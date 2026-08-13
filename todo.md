@@ -32,7 +32,7 @@
 - [x] Phase 6: Add deterministic view-model tests for zero data, vehicle/period filters, category totals, fuel-efficiency completeness, and drill-down targets.
 - [x] Phase 7: Implement reminder rules, local notifications, deep links, permission states, and settings.
 - [x] Phase 7: Test denied permission, rescheduling, duplicate prevention, timezone changes, app restart, no internet, due/overdue boundaries, and settings recovery.
-- [ ] Phase 7: Commit and push the tested reminders, notifications, and settings.
+- [x] Phase 7: Commit and push the tested reminders, notifications, and settings.
 - [x] Phase 7: Add reminder repository operations and pure schedule, duplicate, and status policies.
 - [x] Phase 7: Implement vehicle-aware reminder create, edit, complete, snooze, and reschedule flows.
 - [x] Phase 7: Add local notification permission, scheduling, cancellation, and deep-link handling with recovery feedback.
