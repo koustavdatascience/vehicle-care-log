@@ -31,8 +31,8 @@ const env = {
   appName: "Vehicle Care Log",
   appSlug: "vehicle-care-log-app",
   // S3 URL of the app logo - set this to the URL returned by generate_image when creating custom logo
-  // Leave empty to use the default icon from assets/images/icon.png
-  logoUrl: "",
+  // Generated Vehicle Care Log icon, also copied into the native app asset locations.
+  logoUrl: "/manus-storage/vehicle-care-log-icon_db40364d.png",
   scheme: schemeFromBundleId,
   iosBundleId: bundleId,
   androidPackage: bundleId,
@@ -64,20 +64,6 @@ const config: ExpoConfig = {
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
-    permissions: ["POST_NOTIFICATIONS"],
-    intentFilters: [
-      {
-        action: "VIEW",
-        autoVerify: true,
-        data: [
-          {
-            scheme: env.scheme,
-            host: "*",
-          },
-        ],
-        category: ["BROWSABLE", "DEFAULT"],
-      },
-    ],
   },
   web: {
     bundler: "metro",
@@ -86,19 +72,6 @@ const config: ExpoConfig = {
   },
   plugins: [
     "expo-router",
-    [
-      "expo-audio",
-      {
-        microphonePermission: "Allow $(PRODUCT_NAME) to access your microphone.",
-      },
-    ],
-    [
-      "expo-video",
-      {
-        supportsBackgroundPlayback: true,
-        supportsPictureInPicture: true,
-      },
-    ],
     [
       "expo-splash-screen",
       {
@@ -114,9 +87,12 @@ const config: ExpoConfig = {
     [
       "expo-build-properties",
       {
+        ios: {
+          deploymentTarget: "16.0",
+        },
         android: {
           buildArchs: ["armeabi-v7a", "arm64-v8a"],
-          minSdkVersion: 24,
+          minSdkVersion: 29,
         },
       },
     ],

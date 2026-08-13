@@ -2,7 +2,21 @@
 
 Vehicle Care Log is a cross-platform iOS and Android application for tracking vehicle fuel, service, repairs, reminders, and expenses.
 
-This repository currently contains the approved product planning materials and the completed Phase 1 scope baseline. Implementation is performed one phase at a time, with tests and a GitHub commit required before advancing.
+This repository contains the approved product planning materials and the Vehicle Care Log Expo mobile project. Implementation is performed one phase at a time, with tests and a GitHub commit required before advancing.
+
+## Mobile project
+
+The app uses Expo Router, React Native, TypeScript, NativeWind, and Vitest. The first pilot is deliberately local-first: the app does not bundle secrets or enable account-based synchronization before the corresponding implementation phase.
+
+| Command | Purpose |
+|---|---|
+| `pnpm dev` | Start the development services and Expo web runtime. |
+| `pnpm check` | Run TypeScript without emitting output. |
+| `pnpm lint` | Run Expo lint rules. |
+| `pnpm test` | Run deterministic unit tests. |
+| `pnpm quality` | Run the Phase 2 quality gate. |
+
+Further engineering conventions are documented in [`docs/development.md`](docs/development.md), and source boundaries are described in [`src/README.md`](src/README.md).
 
 ## Repository contents
 
@@ -36,9 +50,5 @@ The first pilot is a local-first Reminder-Ready MVP. It includes vehicle profile
 
 ## Development status
 
-**Phase 1:** Scope, decisions, release matrix, updated backlog, and risk register prepared.
-**Phase 2:** Not started.
-
-## Original planning location
-
-The planning materials were originally prepared under the local `vehicle-care-log-project` folder. Implementation source will be added to this repository root as the mobile project is built.
+**Phase 1:** Complete and committed.  
+**Phase 2:** Complete locally; the Expo project foundation, public configuration validation, first-run startup state, test harness, CI workflow, app icon, and platform policy checks are ready for the phase commit.

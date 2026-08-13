@@ -1,0 +1,34 @@
+# Project TODO
+
+- [x] Phase 1: Finalize the pilot scope baseline, technical decisions, release matrix, prioritized backlog, and risk register in the planning repository.
+- [x] Phase 1: Review and push the Phase 1 documentation commit to GitHub.
+- [x] Phase 2: Create the Expo mobile project foundation and maintain the project design brief.
+- [x] Phase 2: Configure the app identity, portrait orientation, package metadata, and source-directory conventions.
+- [x] Phase 2: Create deterministic unit-test fixtures and checks for foundation configuration, startup behavior, and invalid configuration states.
+- [x] Phase 2: Add lint, type-check, test, and CI automation suitable for a clean clone.
+- [x] Phase 2: Generate and configure a unique Vehicle Care Log app icon across iOS, Android, splash, and web assets.
+- [x] Phase 2: Validate the development startup path, empty first-run path, invalid configuration path, and clean-install behavior.
+- [x] Phase 2: Commit and push the tested engineering foundation.
+- [ ] Phase 3: Implement theme tokens, shared components, tab navigation, stack navigation, and empty/loading/error states.
+- [ ] Phase 3: Test the navigation shell, safe-area behavior, accessibility labels, first-run state, and visual states on supported platforms.
+- [ ] Phase 3: Commit and push the tested design system and navigation shell.
+- [ ] Phase 4: Implement domain types, SQLite schema, migrations, repositories, validation, seeded fixtures, and local persistence recovery.
+- [ ] Phase 4: Test missing data, storage failure, invalid/negative values, future odometer values, duplicate records, migration, restart, and deletion behavior.
+- [ ] Phase 4: Commit and push the tested local data architecture.
+- [ ] Phase 5: Implement vehicle profiles and fuel, service, and repair create/read/update/delete workflows.
+- [ ] Phase 5: Test first vehicle, empty records, invalid forms, duplicate entries, out-of-order odometers, edit/delete confirmation, and persistence after restart.
+- [ ] Phase 5: Commit and push the tested vehicle and record workflows.
+- [ ] Phase 6: Implement dashboard summaries, history filters, expense calculations, report states, and linked drill-down views.
+- [ ] Phase 6: Test zero data, mixed currencies or units, period changes, correct totals, rounded amounts, due-soon and overdue boundaries, and linked-record navigation.
+- [ ] Phase 6: Commit and push the tested dashboard, history, expenses, and reports.
+- [ ] Phase 7: Implement reminder rules, local notifications, deep links, permission states, and settings.
+- [ ] Phase 7: Test denied permission, rescheduling, duplicate prevention, timezone changes, app restart, no internet, due/overdue boundaries, and settings recovery.
+- [ ] Phase 7: Commit and push the tested reminders, notifications, and settings.
+- [ ] Phase 8: Implement approved account, cloud sync, attachment, and backup capabilities only after the local-first flows are stable.
+- [ ] Phase 8: Test offline outbox handling, conflict resolution, upload failure, account recovery, data deletion, and retry behavior.
+- [ ] Phase 8: Commit and push the tested connected-data capabilities.
+- [ ] Phase 9: Complete accessibility, privacy, performance, reliability, analytics, and broad automated test coverage.
+- [ ] Phase 9: Test assistive technology, Dynamic Type, low storage, poor network, sensitive-log redaction, large data sets, and regression suite behavior.
+- [ ] Phase 9: Commit and push the tested quality hardening.
+- [ ] Phase 10: Prepare release configuration, pilot checklist, support materials, versioning, and final delivery documentation.
+- [ ] Phase 10: Validate signed release candidates, smoke-test critical journeys, confirm release notes, and push the final release-preparation commit.
