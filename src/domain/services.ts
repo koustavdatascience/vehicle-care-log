@@ -1,4 +1,4 @@
-import type { ExpenseProjection, FuelEntry, Money, Reminder, Vehicle } from "./models";
+import type { ExpenseProjection, FuelEntry, Money, Reminder, RepairRecord, ServiceRecord, Vehicle } from "./models";
 
 export type ValidationCode =
   | "required"
@@ -71,6 +71,62 @@ export function validateMoney(value: Money | null): ValidationResult {
     return { ok: false, issues: [issue("cost", "negative-value", "Cost must be zero or greater.")] };
   }
   return { ok: true };
+}
+
+export function validateServiceDraft(
+  service: Pick<ServiceRecord, "category" | "occurredOn" | "odometerKm" | "cost" | "nextDueOn" | "nextDueOdometerKm">,
+  today: string,
+  previousOdometerKm: number | null = null,
+): ValidationResult {
+  const issues: ValidationIssue[] = [];
+  if (!service.category.trim()) issues.push(issue("category", "required", "Enter a service category."));
+
+  const occurrence = validateDateNotInFuture(service.occurredOn, today);
+  if (!occurrence.ok) issues.push(...occurrence.issues);
+
+  const odometer = validateOdometerProgression(previousOdometerKm, service.odometerKm);
+  if (!odometer.ok) issues.push(...odometer.issues);
+
+  const cost = validateMoney(service.cost);
+  if (!cost.ok) issues.push(...cost.issues);
+
+  if (service.nextDueOn !== null) {
+    if (!isValidIsoDate(service.nextDueOn)) {
+      issues.push(issue("nextDueOn", "invalid-date", "Enter a valid next due date."));
+    } else if (isValidIsoDate(service.occurredOn) && service.nextDueOn < service.occurredOn) {
+      issues.push(issue("nextDueOn", "invalid-value", "The next due date cannot be before the service date."));
+    }
+  }
+
+  if (service.nextDueOdometerKm !== null) {
+    const nextOdometer = validateNonNegativeInteger("nextDueOdometerKm", service.nextDueOdometerKm);
+    if (!nextOdometer.ok) issues.push(...nextOdometer.issues);
+    else if (service.nextDueOdometerKm < service.odometerKm) {
+      issues.push(issue("nextDueOdometerKm", "invalid-value", "The next due mileage cannot be below the service mileage."));
+    }
+  }
+
+  return issues.length ? { ok: false, issues } : { ok: true };
+}
+
+export function validateRepairDraft(
+  repair: Pick<RepairRecord, "issue" | "occurredOn" | "odometerKm" | "cost">,
+  today: string,
+  previousOdometerKm: number | null = null,
+): ValidationResult {
+  const issues: ValidationIssue[] = [];
+  if (!repair.issue.trim()) issues.push(issue("issue", "required", "Describe the problem or repair."));
+
+  const occurrence = validateDateNotInFuture(repair.occurredOn, today);
+  if (!occurrence.ok) issues.push(...occurrence.issues);
+
+  const odometer = validateOdometerProgression(previousOdometerKm, repair.odometerKm);
+  if (!odometer.ok) issues.push(...odometer.issues);
+
+  const cost = validateMoney(repair.cost);
+  if (!cost.ok) issues.push(...cost.issues);
+
+  return issues.length ? { ok: false, issues } : { ok: true };
 }
 
 export function calculateExpenseTotal(entries: readonly ExpenseProjection[], currency: Money["currency"] = "INR"): Money {

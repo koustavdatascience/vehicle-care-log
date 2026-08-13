@@ -21,7 +21,7 @@ class FakeFuelDatabase implements SqlDatabase {
 
   async getFirstAsync<T>(source: string): Promise<T | null> {
     if (source.includes("current_odometer_km")) return { current_odometer_km: 46000 } as T;
-    if (source.includes("duplicate_fingerprint")) return this.duplicateId ? ({ id: this.duplicateId } as T) : null;
+    if (source.includes("FROM fuel_entries") && source.includes("COALESCE(station")) return this.duplicateId ? ({ id: this.duplicateId } as T) : null;
     return null;
   }
 
@@ -62,8 +62,9 @@ describe("Phase 4 local fuel repository", () => {
     const saved = await new LocalFuelRepository(database).create(seedFuelEntry, "2026-08-13");
     expect(saved.id).toBe(seedFuelEntry.id);
     expect(database.transactionCount).toBe(1);
-    expect(database.runCalls).toHaveLength(3);
-    expect(database.runCalls[1].source).toContain("expense_projections");
-    expect(database.runCalls[2].source).toContain("UPDATE vehicles");
+    expect(database.runCalls).toHaveLength(4);
+    expect(database.runCalls[1].source).toContain("DELETE FROM expense_projections");
+    expect(database.runCalls[2].source).toContain("expense_projections");
+    expect(database.runCalls[3].source).toContain("UPDATE vehicles");
   });
 });

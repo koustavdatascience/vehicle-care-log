@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { calculateExpenseTotal, calculateFuelEfficiency, getReminderStatus, validateDateNotInFuture, validateOdometerProgression, validateVehicleDraft } from "../../src/domain/services";
+import { calculateExpenseTotal, calculateFuelEfficiency, getReminderStatus, validateDateNotInFuture, validateOdometerProgression, validateRepairDraft, validateServiceDraft, validateVehicleDraft } from "../../src/domain/services";
 import { seedFuelEntry, seedVehicle } from "../../src/data/seed-fixtures";
 
 describe("Phase 4 domain services", () => {
@@ -20,5 +20,18 @@ describe("Phase 4 domain services", () => {
     const reminder = { id: "reminder-1", vehicleId: seedVehicle.id, title: "Oil change", dueOn: "2026-08-20", dueOdometerKm: null, completedAt: null, snoozedUntil: null, createdAt: "", updatedAt: "", deletedAt: null, syncState: "local" as const };
     expect(getReminderStatus(reminder, "2026-08-13")).toBe("due-soon");
     expect(getReminderStatus({ ...reminder, dueOn: "2026-08-12" }, "2026-08-13")).toBe("overdue");
+  });
+
+  it("rejects invalid service due rules, future dates, and regressing odometers", () => {
+    const result = validateServiceDraft({ category: "", occurredOn: "2026-08-14", odometerKm: 42000, cost: { amountMinor: -1, currency: "INR" }, nextDueOn: "2026-08-01", nextDueOdometerKm: 41000 }, "2026-08-13", 42500);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.issues.map((issue) => issue.field)).toEqual(expect.arrayContaining(["category", "occurredOn", "odometerKm", "cost", "nextDueOn", "nextDueOdometerKm"]));
+  });
+
+  it("accepts a complete repair draft and rejects missing issues or negative cost", () => {
+    const valid = validateRepairDraft({ issue: "Brake pad wear", occurredOn: "2026-08-13", odometerKm: 46000, cost: { amountMinor: 120000, currency: "INR" } }, "2026-08-13", 45000);
+    expect(valid.ok).toBe(true);
+    const invalid = validateRepairDraft({ issue: " ", occurredOn: "2026-08-13", odometerKm: 46000, cost: { amountMinor: -1, currency: "INR" } }, "2026-08-13");
+    expect(invalid.ok).toBe(false);
   });
 });

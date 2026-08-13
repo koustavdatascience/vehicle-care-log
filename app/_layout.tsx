@@ -19,6 +19,7 @@ import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
 import { LocalStorageProvider } from "@/components/foundation/local-storage-provider";
+import { VehicleProvider } from "@/components/foundation/vehicle-provider";
 
 const DEFAULT_WEB_INSETS: EdgeInsets = { top: 0, right: 0, bottom: 0, left: 0 };
 const DEFAULT_WEB_FRAME: Rect = { x: 0, y: 0, width: 0, height: 0 };
@@ -84,13 +85,17 @@ export default function RootLayout() {
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
           <LocalStorageProvider>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen name="add-record" options={{ presentation: "modal", animation: "slide_from_bottom" }} />
-              <Stack.Screen name="vehicle/[id]" options={{ animation: "slide_from_right" }} />
-              <Stack.Screen name="oauth/callback" />
-            </Stack>
-            <StatusBar style="auto" />
+            <VehicleProvider>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen name="add-record" options={{ presentation: "modal", animation: "slide_from_bottom" }} />
+                <Stack.Screen name="vehicle/[id]" options={{ animation: "slide_from_right" }} />
+                <Stack.Screen name="vehicle/[id]/records" options={{ animation: "slide_from_right" }} />
+                <Stack.Screen name="record/[type]/[id]" options={{ animation: "slide_from_right" }} />
+                <Stack.Screen name="oauth/callback" />
+              </Stack>
+              <StatusBar style="auto" />
+            </VehicleProvider>
           </LocalStorageProvider>
         </QueryClientProvider>
       </trpc.Provider>

@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 import { AppHeader } from "@/components/layout/app-header";
+import { useActiveVehicle } from "@/components/foundation/vehicle-provider";
 import { SectionHeader } from "@/components/layout/section-header";
 import { VehicleSelector } from "@/components/layout/vehicle-selector";
 import { ScreenContainer } from "@/components/screen-container";
@@ -16,9 +17,10 @@ const quickActions = [{ label: "Fuel", icon: "creditcard.fill" as const }, { lab
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { activeVehicle, selectVehicle, vehicles } = useActiveVehicle();
   return <ScreenContainer><ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
     <AppHeader title="Vehicle Care Log" subtitle="Your local vehicle-care workspace" action={<VclIconButton icon="plus.circle.fill" label="Open add record menu" onPress={() => router.push("/add-record")} />} />
-    <VehicleSelector label="No vehicle selected" helperText="Add your first vehicle when vehicle profiles open in Phase 5." disabled />
+    <VehicleSelector label={activeVehicle?.nickname ?? "No vehicle selected"} helperText={activeVehicle ? `${activeVehicle.make} ${activeVehicle.model} · ${activeVehicle.year}` : "Add a vehicle to start recording care activity."} vehicles={vehicles} activeVehicleId={activeVehicle?.id ?? null} onSelectVehicle={(id) => { void selectVehicle(id); }} onManageVehicles={() => router.push("/(tabs)/settings")} />
     <StatusBanner title="Pilot data mode" message="Records remain on this device. Cloud backup and account sync are not enabled." />
     <SectionHeader title="Care overview" />
     <View style={styles.summaryGrid}><SummaryCard icon="clock.fill" label="Next service" value="No schedule" /><SummaryCard icon="chart.pie.fill" label="This period" value="No expenses" /></View>

@@ -16,9 +16,13 @@
 - [x] Phase 4: Implement domain types, SQLite schema, migrations, repositories, validation, seeded fixtures, and local persistence recovery.
 - [x] Phase 4: Test missing data, storage failure, invalid/negative values, future odometer values, duplicate records, migration, restart, and deletion behavior.
 - [x] Phase 4: Commit and push the tested local data architecture.
-- [ ] Phase 5: Implement vehicle profiles and fuel, service, and repair create/read/update/delete workflows.
-- [ ] Phase 5: Test first vehicle, empty records, invalid forms, duplicate entries, out-of-order odometers, edit/delete confirmation, and persistence after restart.
+- [x] Phase 5: Implement vehicle profiles and fuel, service, and repair create/read/update/delete workflows.
+- [x] Phase 5: Test first vehicle, empty records, invalid forms, duplicate entries, out-of-order odometers, edit/delete confirmation, and persistence after restart.
 - [ ] Phase 5: Commit and push the tested vehicle and record workflows.
+- [x] Phase 5: Add persisted active-vehicle state and operational vehicle selection.
+- [x] Phase 5: Add vehicle create, edit, archive, list, and empty-state screens.
+- [x] Phase 5: Add validated fuel, service, and repair creation, update, list, detail, and deletion workflows.
+- [x] Phase 5: Add deterministic tests for vehicle, service, and repair repositories and active-vehicle persistence.
 - [ ] Phase 6: Implement dashboard summaries, history filters, expense calculations, report states, and linked drill-down views.
 - [ ] Phase 6: Test zero data, mixed currencies or units, period changes, correct totals, rounded amounts, due-soon and overdue boundaries, and linked-record navigation.
 - [ ] Phase 6: Commit and push the tested dashboard, history, expenses, and reports.
