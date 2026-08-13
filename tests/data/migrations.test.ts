@@ -28,28 +28,25 @@ class FakeMigrationDatabase implements SqlDatabase {
 }
 
 describe("local-first migration contract", () => {
-  it("has monotonic migrations with integrity structures, reminder lifecycle fields, and Phase 8 sync queues", () => {
-    expect(LOCAL_SCHEMA_VERSION).toBe(3);
-    expect(migrations.map((migration) => migration.version)).toEqual([1, 2, 3]);
+  it("has monotonic migrations with integrity structures and Phase 7 reminder lifecycle fields", () => {
+    expect(LOCAL_SCHEMA_VERSION).toBe(2);
+    expect(migrations.map((migration) => migration.version)).toEqual([1, 2]);
     expect(migrations[0].sql).toContain("PRAGMA foreign_keys = ON");
     expect(migrations[0].sql).toContain("expense_projections");
     expect(migrations[0].sql).toContain("sync_metadata");
     expect(migrations[0].sql).toContain("idx_fuel_dedup_active");
     expect(migrations[0].sql).toContain("snoozed_until");
     expect(migrations[1].sql).toContain("notification_lead_days");
-    expect(migrations[2].sql).toContain("sync_outbox");
-    expect(migrations[2].sql).toContain("sync_conflicts");
-    expect(migrations[2].sql).toContain("upload_status");
   });
 
   it("creates the full initial schema on a fresh install and is idempotent on restart", async () => {
     const database = new FakeMigrationDatabase();
 
-    expect(await migrateDatabase(database)).toBe(3);
-    expect(database.version).toBe(3);
+    expect(await migrateDatabase(database)).toBe(2);
+    expect(database.version).toBe(2);
     expect(database.executed.join("\n")).toContain("CREATE TABLE IF NOT EXISTS vehicles");
     const writesAfterFirstLaunch = database.executed.length;
-    expect(await migrateDatabase(database)).toBe(3);
+    expect(await migrateDatabase(database)).toBe(2);
     expect(database.executed).toHaveLength(writesAfterFirstLaunch);
   });
 

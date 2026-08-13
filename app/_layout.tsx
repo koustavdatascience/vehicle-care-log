@@ -20,10 +20,8 @@ import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
 import { LocalStorageProvider } from "@/components/foundation/local-storage-provider";
-import { SyncProvider } from "@/components/foundation/sync-provider";
 import { VehicleProvider } from "@/components/foundation/vehicle-provider";
 import { PreferencesProvider } from "@/components/foundation/preferences-provider";
-import { AppErrorBoundary } from "@/components/foundation/app-error-boundary";
 import { notificationReminderId } from "@/src/notifications/reminder-notification-policy";
 
 const DEFAULT_WEB_INSETS: EdgeInsets = { top: 0, right: 0, bottom: 0, left: 0 };
@@ -102,15 +100,13 @@ export default function RootLayout() {
 
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <AppErrorBoundary>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
           <LocalStorageProvider>
             <PreferencesProvider>
-              <SyncProvider>
-                <VehicleProvider>
-                  <NotificationResponseRouter />
-                  <Stack screenOptions={{ headerShown: false }}>
+              <VehicleProvider>
+                <NotificationResponseRouter />
+                <Stack screenOptions={{ headerShown: false }}>
                   <Stack.Screen name="(tabs)" />
                   <Stack.Screen name="add-record" options={{ presentation: "modal", animation: "slide_from_bottom" }} />
                   <Stack.Screen name="vehicle/[id]" options={{ animation: "slide_from_right" }} />
@@ -120,15 +116,13 @@ export default function RootLayout() {
                   <Stack.Screen name="reminder/new" options={{ presentation: "modal", animation: "slide_from_bottom" }} />
                   <Stack.Screen name="reminder/[id]" options={{ animation: "slide_from_right" }} />
                   <Stack.Screen name="oauth/callback" />
-                  </Stack>
-                  <StatusBar style="auto" />
-                </VehicleProvider>
-              </SyncProvider>
+                </Stack>
+                <StatusBar style="auto" />
+              </VehicleProvider>
             </PreferencesProvider>
           </LocalStorageProvider>
         </QueryClientProvider>
       </trpc.Provider>
-      </AppErrorBoundary>
     </GestureHandlerRootView>
   );
 

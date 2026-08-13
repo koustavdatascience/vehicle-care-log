@@ -95,22 +95,3 @@ export async function storageGetSignedUrl(relKey: string): Promise<string> {
   const { url } = (await resp.json()) as { url: string };
   return url;
 }
-
-/** Returns a short-lived direct-upload URL for an owner-scoped object key. */
-export async function storageGetUploadSignedUrl(relKey: string): Promise<string> {
-  const { forgeUrl, forgeKey } = getForgeConfig();
-  const key = normalizeKey(relKey);
-  const presignUrl = new URL("v1/storage/presign/put", forgeUrl + "/");
-  presignUrl.searchParams.set("path", key);
-
-  const response = await fetch(presignUrl, {
-    headers: { Authorization: `Bearer ${forgeKey}` },
-  });
-  if (!response.ok) {
-    const message = await response.text().catch(() => response.statusText);
-    throw new Error(`Storage upload intent failed (${response.status}): ${message}`);
-  }
-  const { url } = (await response.json()) as { url: string };
-  if (!url) throw new Error("Storage returned an empty upload intent");
-  return url;
-}

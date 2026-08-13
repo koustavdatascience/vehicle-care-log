@@ -39,21 +39,15 @@
 - [x] Phase 7: Add deterministic tests for notification denial, timezone-safe schedule calculations, duplicate prevention, restart recovery, and due-status boundaries.
 - [x] CI repair: Inspect and correct the Phase 7 GitHub Quality Gate failure.
 - [x] CI repair: Re-run local validation, checkpoint, push, and confirm the GitHub workflow succeeds.
-- [x] Phase 8: Implement approved account, cloud sync, attachment, and backup capabilities only after the local-first flows are stable.
-- [x] Phase 8: Test offline outbox handling, conflict resolution, upload failure, account recovery, data deletion, and retry behavior.
-- [x] Phase 8: Commit and push the tested connected-data capabilities.
-- [x] Phase 9: Complete accessibility, privacy, performance, reliability, analytics, and broad automated test coverage.
-- [x] Phase 9: Test assistive technology readiness, Dynamic Type layout contracts, low-storage and poor-network recovery paths, sensitive-log redaction, large data sets, and regression-suite behavior; retain the native pilot checklist for device validation.
-- [x] Phase 9: Commit and push the tested quality hardening.
-- [x] Phase 10: Prepare release configuration, pilot checklist, support materials, versioning, and final delivery documentation.
-- [x] Phase 10: Run deterministic migration, sync/backup recovery, notification, core-record, release-config, and documentation rehearsals; push the final release-preparation commit.
-- [ ] Release owner gate: Build signed iOS and Android pilot candidates, complete the physical-device smoke matrix, provide store privacy/support URLs and screenshots, then publish only after recorded approval.
-- [x] Phase 8: Define a local-first optional-auth, outbox, conflict, attachment, and backup architecture decision record.
-- [x] Phase 8: Implement account-aware sync state, offline outbox retry, conflict resolution, portable backup, and attachment workflows.
-- [x] Phase 8: Add connected-data failure, recovery, and migration coverage without making offline use dependent on a network.
-- [x] Phase 9: Audit and improve accessibility semantics, Dynamic Type layout, privacy redaction, storage resilience, and list performance.
-- [x] Phase 9: Add broad deterministic regression coverage for accessibility, large local datasets, retries, privacy, and error boundaries.
-- [x] Phase 9 hotfix: Replace raw OAuth launcher logging with safe diagnostics and add a deterministic privacy regression test.
-- [x] Phase 9 hotfix: Replace raw OAuth callback logging and exception-derived error UI with safe diagnostics and generic recovery messaging.
-- [x] Phase 9 hotfix: Exclude unused owner identity values from mobile-public environment mapping and add a privacy regression contract.
-- [x] Phase 10: Complete versioning, release configuration, pilot checklist, support content, and final release-validation documentation.
+- [ ] Phase 8: Implement approved account, cloud sync, attachment, and backup capabilities only after the local-first flows are stable.
+- [ ] Phase 8: Test offline outbox handling, conflict resolution, upload failure, account recovery, data deletion, and retry behavior.
+- [ ] Phase 8: Commit and push the tested connected-data capabilities.
+- [ ] Phase 9: Complete accessibility, privacy, performance, reliability, analytics, and broad automated test coverage.
+- [ ] Phase 9: Test assistive technology, Dynamic Type, low storage, poor network, sensitive-log redaction, large data sets, and regression suite behavior.
+- [ ] Phase 9: Commit and push the tested quality hardening.
+- [ ] Phase 10: Prepare release configuration, pilot checklist, support materials, versioning, and final delivery documentation.
+- [ ] Phase 10: Validate signed release candidates, smoke-test critical journeys, confirm release notes, and push the final release-preparation commit.
+- [ ] Supabase migration: Preserve offline-first SQLite while replacing the optional cloud sync, account, and attachment backend with Supabase Auth, Postgres, and Storage.
+- [ ] Supabase migration: Define the protected schema, row-level security, secure environment boundary, conflict protocol, data deletion flow, and deployment migration guide.
+- [ ] Supabase migration: Implement, test, checkpoint, and push the optional Supabase-backed sync integration.
+- [x] Maintenance: Add a read-only app-version row to Settings so users can identify the installed Vehicle Care Log release when seeking support.

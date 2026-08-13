@@ -21,8 +21,10 @@ const bundleId =
       return /^[a-zA-Z]/.test(segment) ? segment : "x" + segment;
     })
     .join(".") || "space.manus.app";
-const DEEP_LINK_SCHEME = "vehiclecarelog";
-const appEnvironment = process.env.EXPO_PUBLIC_APP_ENV ?? "development";
+// Extract timestamp from bundle ID and prefix with "manus" for deep link scheme
+// e.g., "space.manus.my.app.t20240115103045" -> "manus20240115103045"
+const timestamp = bundleId.split(".").pop()?.replace(/^t/, "") ?? "";
+const schemeFromBundleId = `manus${timestamp}`;
 
 const env = {
   // App branding - update these values directly (do not use env vars)
@@ -31,7 +33,7 @@ const env = {
   // S3 URL of the app logo - set this to the URL returned by generate_image when creating custom logo
   // Generated Vehicle Care Log icon, also copied into the native app asset locations.
   logoUrl: "/manus-storage/vehicle-care-log-icon_db40364d.png",
-  scheme: DEEP_LINK_SCHEME,
+  scheme: schemeFromBundleId,
   iosBundleId: bundleId,
   androidPackage: bundleId,
 };
@@ -40,20 +42,17 @@ const config: ExpoConfig = {
   name: env.appName,
   slug: env.appSlug,
   version: "1.0.0",
-  description: "A local-first log for vehicle fuel, service, repairs, reminders, and expenses.",
   orientation: "portrait",
   icon: "./assets/images/icon.png",
   scheme: env.scheme,
-  runtimeVersion: { policy: "appVersion" },
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
   ios: {
     supportsTablet: true,
     bundleIdentifier: env.iosBundleId,
-    buildNumber: "1",
     "infoPlist": {
-      "ITSAppUsesNonExemptEncryption": false,
-    },
+        "ITSAppUsesNonExemptEncryption": false
+      }
   },
   android: {
     adaptiveIcon: {
@@ -65,16 +64,6 @@ const config: ExpoConfig = {
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: env.androidPackage,
-    versionCode: 1,
-    permissions: ["POST_NOTIFICATIONS", "SCHEDULE_EXACT_ALARM"],
-    intentFilters: [
-      {
-        action: "VIEW",
-        autoVerify: false,
-        data: [{ scheme: env.scheme }],
-        category: ["BROWSABLE", "DEFAULT"],
-      },
-    ],
   },
   web: {
     bundler: "metro",
@@ -96,9 +85,6 @@ const config: ExpoConfig = {
       "expo-notifications",
       {
         "defaultChannel": "vehicle-care-reminders",
-        "icon": "./assets/images/android-icon-monochrome.png",
-        "color": "#0E7490",
-        "enableBackgroundRemoteNotifications": false,
       },
     ],
     [
@@ -129,12 +115,6 @@ const config: ExpoConfig = {
   experiments: {
     typedRoutes: true,
     reactCompiler: true,
-  },
-  extra: {
-    releaseEnvironment: appEnvironment,
-    dataMode: "local-first",
-    supportsCloudSync: true,
-    privacyPolicyPath: "/docs/privacy",
   },
 };
 

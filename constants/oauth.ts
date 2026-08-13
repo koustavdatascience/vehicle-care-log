@@ -1,9 +1,11 @@
 import * as Linking from "expo-linking";
 import * as ReactNative from "react-native";
 
-import { safeDiagnostic, safeDiagnosticError } from "@/src/diagnostics/safe-diagnostics";
-
-const DEEP_LINK_SCHEME = "vehiclecarelog";
+// Extract scheme from bundle ID (last segment timestamp, prefixed with "manus")
+// e.g., "space.manus.my.app.t20240115103045" -> "manus20240115103045"
+const bundleId = "com.app.vehiclecarelogapp";
+const timestamp = bundleId.split(".").pop()?.replace(/^t/, "") ?? "";
+const schemeFromBundleId = `manus${timestamp}`;
 
 const env = {
   portal: process.env.EXPO_PUBLIC_OAUTH_PORTAL_URL ?? "",
@@ -12,7 +14,7 @@ const env = {
   ownerId: process.env.EXPO_PUBLIC_OWNER_OPEN_ID ?? "",
   ownerName: process.env.EXPO_PUBLIC_OWNER_NAME ?? "",
   apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL ?? "",
-  deepLinkScheme: DEEP_LINK_SCHEME,
+  deepLinkScheme: schemeFromBundleId,
 };
 
 export const OAUTH_PORTAL_URL = env.portal;
@@ -112,14 +114,16 @@ export async function startOAuthLogin(): Promise<string | null> {
 
   const supported = await Linking.canOpenURL(loginUrl);
   if (!supported) {
-    safeDiagnostic("oauth.login_url_unavailable", { hasPortal: Boolean(OAUTH_PORTAL_URL) });
+    console.warn("[OAuth] Cannot open login URL: URL scheme not supported");
+    // 可考虑抛出错误或返回错误状态，让调用方处理
     return null;
   }
 
   try {
     await Linking.openURL(loginUrl);
   } catch (error) {
-    safeDiagnosticError("oauth.login_url_open_failed", error);
+    console.error("[OAuth] Failed to open login URL:", error);
+    // 可考虑抛出错误让调用方处理
   }
 
   // The OAuth callback will reopen the app via deep link.

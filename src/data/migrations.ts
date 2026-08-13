@@ -7,7 +7,7 @@ export interface Migration {
   sql: string;
 }
 
-export const LOCAL_SCHEMA_VERSION = 3;
+export const LOCAL_SCHEMA_VERSION = 2;
 
 export const migrations: readonly Migration[] = [
   {
@@ -140,49 +140,6 @@ export const migrations: readonly Migration[] = [
       ALTER TABLE reminders ADD COLUMN notification_lead_days INTEGER NOT NULL DEFAULT 7;
       ALTER TABLE reminders ADD COLUMN note TEXT;
       CREATE INDEX IF NOT EXISTS idx_reminders_open_vehicle ON reminders(vehicle_id, completed_at, deleted_at, due_on);
-    `,
-  },
-  {
-    version: 3,
-    name: "connected-data-outbox-account-link-and-attachment-queue",
-    sql: `
-      ALTER TABLE attachments ADD COLUMN file_name TEXT;
-      ALTER TABLE attachments ADD COLUMN byte_size INTEGER;
-      ALTER TABLE attachments ADD COLUMN remote_key TEXT;
-      ALTER TABLE attachments ADD COLUMN upload_status TEXT NOT NULL DEFAULT 'queued';
-      CREATE TABLE IF NOT EXISTS sync_account_state (
-        singleton INTEGER PRIMARY KEY NOT NULL CHECK (singleton = 1),
-        account_id TEXT,
-        link_decision TEXT,
-        pull_cursor INTEGER NOT NULL DEFAULT 0,
-        last_sync_at TEXT,
-        last_error TEXT
-      );
-      INSERT OR IGNORE INTO sync_account_state (singleton, account_id, link_decision, pull_cursor, last_sync_at, last_error)
-      VALUES (1, NULL, NULL, 0, NULL, NULL);
-      CREATE TABLE IF NOT EXISTS sync_outbox (
-        entity_type TEXT NOT NULL,
-        entity_id TEXT NOT NULL,
-        operation TEXT NOT NULL,
-        payload TEXT NOT NULL,
-        updated_at TEXT NOT NULL,
-        attempt_count INTEGER NOT NULL DEFAULT 0,
-        next_retry_at TEXT,
-        last_error TEXT,
-        PRIMARY KEY (entity_type, entity_id)
-      );
-      CREATE TABLE IF NOT EXISTS sync_conflicts (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        entity_type TEXT NOT NULL,
-        entity_id TEXT NOT NULL,
-        local_payload TEXT NOT NULL,
-        remote_payload TEXT NOT NULL,
-        detected_at TEXT NOT NULL,
-        resolved_at TEXT
-      );
-      CREATE INDEX IF NOT EXISTS idx_sync_outbox_retry ON sync_outbox(next_retry_at, updated_at);
-      CREATE INDEX IF NOT EXISTS idx_sync_conflicts_open ON sync_conflicts(resolved_at, detected_at DESC);
-      CREATE INDEX IF NOT EXISTS idx_attachments_upload ON attachments(upload_status, deleted_at, created_at);
     `,
   },
 ];

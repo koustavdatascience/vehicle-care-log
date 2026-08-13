@@ -32,13 +32,13 @@ describe("Phase 2 project contract", () => {
     expect(config).toContain("minSdkVersion: 29");
   });
 
-  it("keeps unrelated microphone and video configuration out of the local-first mobile baseline", () => {
+  it("does not add account, cloud-sync, deep-link, microphone, or video configuration before their planned phases", () => {
     const config = readFileSync(resolve(projectRoot, "app.config.ts"), "utf8");
 
+    expect(config).not.toContain("intentFilters");
     expect(config).not.toContain("expo-audio");
     expect(config).not.toContain("expo-video");
-    expect(config).toContain("intentFilters");
-    expect(config).toContain("POST_NOTIFICATIONS");
+    expect(config).not.toContain("POST_NOTIFICATIONS");
   });
 
   it("uses a stable local-first Expo command by default while retaining an explicit future full-stack command", () => {

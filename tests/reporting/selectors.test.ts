@@ -49,22 +49,4 @@ describe("Phase 6 reporting selectors", () => {
     expect(dashboard.vehicleName).toBe("Honda City");
     expect(dashboard.currentOdometerKm).toBe(46420);
   });
-
-  it("derives fuel insight deterministically from a large local history without reordering caller data", () => {
-    const largeHistory = Array.from({ length: 1000 }, (_, index) => ({
-      ...seedFuelEntry,
-      id: `fuel-${index}`,
-      occurredOn: "2026-01-01",
-      createdAt: `2026-01-01T${String(Math.floor(index / 60)).padStart(2, "0")}:${String(index % 60).padStart(2, "0")}:00.000Z`,
-      updatedAt: "2026-01-01",
-      odometerKm: 10000 + index * 10,
-      quantityMilliLitres: 10000,
-      deletedAt: null,
-      syncState: "local" as const,
-    }));
-    const before = largeHistory.map((entry) => entry.id);
-    const insight = buildFuelInsight(largeHistory);
-    expect(insight.efficiencyKmPerLitre).toBe(1);
-    expect(largeHistory.map((entry) => entry.id)).toEqual(before);
-  });
 });

@@ -46,30 +46,13 @@ export function buildNextService(dueServices: readonly DueServiceItem[], today: 
 }
 
 export function buildFuelInsight(fuelEntries: readonly FuelEntry[]): DashboardViewModel["fuelInsight"] {
-  const { current, previous } = latestFuelPair(fuelEntries);
+  const ordered = [...fuelEntries].sort((first, second) => `${first.occurredOn}|${first.createdAt}`.localeCompare(`${second.occurredOn}|${second.createdAt}`));
+  const current = ordered.at(-1) ?? null;
+  const previous = ordered.at(-2) ?? null;
   const efficiencyKmPerLitre = calculateFuelEfficiency(previous, current);
   if (!current) return { label: "No fuel data", detail: "Add a fuel record to start tracking fills.", efficiencyKmPerLitre: null };
   if (efficiencyKmPerLitre === null) return { label: "Fuel efficiency unavailable", detail: "Add a compatible consecutive fuel record to calculate km/l.", efficiencyKmPerLitre: null };
   return { label: `${efficiencyKmPerLitre.toLocaleString("en-IN")} km/l`, detail: `Based on the latest two fills through ${current.occurredOn}.`, efficiencyKmPerLitre };
-}
-
-/** Keeps dashboard fuel insight linear even when a local database contains years of fills. */
-function latestFuelPair(fuelEntries: readonly FuelEntry[]): { current: FuelEntry | null; previous: FuelEntry | null } {
-  let current: FuelEntry | null = null;
-  let previous: FuelEntry | null = null;
-  for (const entry of fuelEntries) {
-    if (current === null || fuelSortKey(entry) > fuelSortKey(current)) {
-      previous = current;
-      current = entry;
-    } else if (previous === null || fuelSortKey(entry) > fuelSortKey(previous)) {
-      previous = entry;
-    }
-  }
-  return { current, previous };
-}
-
-function fuelSortKey(entry: FuelEntry): string {
-  return `${entry.occurredOn}|${entry.createdAt}|${entry.id}`;
 }
 
 export function buildDashboardViewModel(input: {
