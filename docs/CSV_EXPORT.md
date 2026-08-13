@@ -4,6 +4,10 @@
 
 This document defines the **Phase 1 contract** for a future local CSV export. The formatter, file creation, sharing experience, and export interface are intentionally outside this phase.
 
+## Contribution Attribution
+
+Before pushing a substantive export phase, the maintainer verifies the local Git author uses the GitHub account’s numeric no-reply address in the form `<numeric-id>+<login>@users.noreply.github.com`. The repository test validates this address format without depending on local Git configuration, so clean CI clones remain reproducible.
+
 ## Privacy Boundary
 
 The export is designed to run entirely on the device for **one selected vehicle**. It will not create an account requirement, use cloud sync, send record data to a server, or rely on an AI service.

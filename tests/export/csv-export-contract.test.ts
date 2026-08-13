@@ -1,7 +1,6 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
+import { isGithubNoReplyEmail } from "../../src/export/contribution-attribution";
 import {
   CSV_EXPORT_COLUMNS,
   CSV_EXPORT_PRIVACY_BOUNDARY,
@@ -60,9 +59,15 @@ describe("CSV export Phase 1 contract", () => {
 });
 
 describe("GitHub contribution attribution", () => {
-  it("uses the authenticated user no-reply email for future substantive commits", () => {
-    const config = readFileSync(resolve(process.cwd(), ".git/config"), "utf8");
-    expect(config).toContain("name = koustavdatascience");
-    expect(config).toContain("email = 305587514+koustavdatascience@users.noreply.github.com");
+  it("accepts only the authenticated user no-reply email format", () => {
+    expect(isGithubNoReplyEmail(
+      "305587514+koustavdatascience@users.noreply.github.com",
+      "koustavdatascience",
+    )).toBe(true);
+    expect(isGithubNoReplyEmail("dev-agent@manus.ai", "koustavdatascience")).toBe(false);
+    expect(isGithubNoReplyEmail(
+      "305587514+another-user@users.noreply.github.com",
+      "koustavdatascience",
+    )).toBe(false);
   });
 });
