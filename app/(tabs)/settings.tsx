@@ -103,7 +103,7 @@ export default function SettingsScreen() {
         </VclCard>
         <VclCard style={styles.preferencesCard}>
           <Text style={[styles.preferenceTitle, { color: colors.foreground }]}>Local CSV report</Text>
-          <Text style={[styles.detail, { color: colors.muted }]}>Create a spreadsheet-friendly fuel, service, and repair report. It remains on this device until you choose an app in the share sheet.</Text>
+          <Text style={[styles.detail, { color: colors.muted }]} accessibilityLabel="Local-only report. It is created on this device, then may be copied by the app you choose from the share sheet.">Create a spreadsheet-friendly fuel, service, and repair report. It is created on this device, then may be copied by the app you choose in the share sheet.</Text>
           <VehicleSelector label={exportVehicle?.nickname ?? "Choose a vehicle"} helperText="The report includes only this vehicle's selected local records." vehicles={vehicles} activeVehicleId={exportVehicle?.id ?? null} onSelectVehicle={(id) => setExportVehicleId(id)} onManageVehicles={() => router.push("/(tabs)/settings")} disabled={exportingCsv} />
           <VclSegmentedControl label="CSV date range" value={exportPeriod} options={exportPeriodOptions} onChange={setExportPeriod} />
           <VclButton label={exportingCsv ? "Preparing CSV report" : "Export CSV report"} variant="secondary" onPress={() => { void exportCsv(); }} disabled={exportingCsv || !exportVehicle} accessibilityHint="Creates a local CSV report and opens the device share sheet." />

@@ -1,36 +1,42 @@
-# Local CSV Export Contract
+# Local CSV Export
 
-## Status
+## Purpose and Availability
 
-This document defines the **Phase 1 contract** for a future local CSV export. The formatter, file creation, sharing experience, and export interface are intentionally outside this phase.
+Vehicle Care Log can create a **local-only**, spreadsheet-friendly CSV report for one selected vehicle. The report contains selected fuel, service, and repair records and is intended for a user who wants to review their own maintenance history outside the app.
 
-## Formatter Behavior
+The export flow is available on supported iOS and Android devices. It does not require an account, cloud sync, an AI service, or an internet connection. Browser builds deliberately report that native sharing is unavailable instead of attempting to transmit data through a web download.
 
-Phase 2 adds a pure local formatter. It emits the stable contract column order using CRLF line endings, escapes commas, quotes, and line breaks using RFC 4180-compatible quoting, formats INR paise as two-decimal rupee amounts and millilitres as litres, and returns an explicit empty result rather than creating a blank file. Text that begins with a spreadsheet formula prefix is protected before export.
+## Export Flow
 
-## Contribution Attribution
+| Step | Behaviour |
+|---|---|
+| Select scope | The user chooses one vehicle and a local date range: all time, this year, last 12 months, or last 30 days. |
+| Create report | The app reads only that vehicle’s locally stored fuel, service, and repair records, then creates a CSV in the device cache. |
+| Share | The device share sheet opens. The user decides whether to share, save, or cancel. |
+| Recover | Empty, unsupported, and file/share failures are shown as bounded recovery messages without technical error details. |
 
-Before pushing a substantive export phase, the maintainer verifies the local Git author uses the GitHub account’s numeric no-reply address in the form `<numeric-id>+<login>@users.noreply.github.com`. The repository test validates this address format without depending on local Git configuration, so clean CI clones remain reproducible.
+> **Important:** After a user selects a destination in the share sheet, that destination app may copy or retain the report under its own privacy practices.
 
 ## Privacy Boundary
 
-The export is designed to run entirely on the device for **one selected vehicle**. It will not create an account requirement, use cloud sync, send record data to a server, or rely on an AI service.
+The CSV is deliberately limited to the following columns: record type, date, odometer in kilometres, category or description, amount in INR, fuel in litres, next-due date, and next-due odometer.
 
-The CSV will deliberately exclude record identifiers, vehicle registration labels, provider or station names, free-text notes, account or owner identifiers, sync state, attachment metadata, and diagnostics. The user controls the vehicle, record types, and optional inclusive ISO date range to include.
+It excludes record IDs, vehicle registration labels, provider or station names, free-text notes, account or owner identifiers, sync state, attachment metadata, diagnostics, and local file paths. The data remains on the device until the user chooses a destination app from the native share sheet.
 
-## Planned Columns
+Temporary reports are written to the app cache rather than persistent document storage. If file creation or sharing fails after a report was written, the app attempts to delete that partial cached file and presents only a generic retry message. Successfully shared reports remain in the system cache long enough for the selected destination app to receive them; operating systems may clear cached files later.
 
-| Column | Source | Notes |
-|---|---|---|
-| Record type | Fuel, service, or repair type | No record ID is exported. |
-| Date | `occurredOn` | ISO calendar date. |
-| Odometer (km) | `odometerKm` | Displayed in kilometres. |
-| Category or description | Sanitised category, issue, or work label | Provider and free-text notes are excluded. |
-| Amount (INR) | `amountMinor` and `currency` | Future formatter converts paise to an INR decimal value. |
-| Fuel (litres) | `quantityMilliLitres` | Future formatter converts millilitres to litres. |
-| Next due date | Service next-due date | Blank when not applicable. |
-| Next due odometer (km) | Service next-due odometer | Blank when not applicable. |
+## CSV Format and Spreadsheet Safety
 
-## Result States
+The formatter uses a fixed eight-column order and CRLF line endings. It escapes commas, quotation marks, and line breaks using RFC 4180-compatible CSV quoting. Values that begin with spreadsheet formula prefixes are protected before export. Empty filters return a clear no-records result rather than a blank or header-only report.
 
-The future formatter returns either a ready-to-share CSV result with a filename and row count, or an explicit empty state. An empty filter result will not be silently represented as a header-only file.
+## Accessibility and Testing
+
+The Settings action names the export operation, describes that it opens the device share sheet, prevents repeated taps while a report is being prepared, and announces the outcome through a polite alert region. Test on a physical iOS or Android device before a release because the native share sheet is platform-provided.
+
+For deterministic development validation, run:
+
+```bash
+pnpm qualify
+```
+
+This validates the CSV contract, formatter, local record selection, temporary-file policy, sharing outcomes, Settings recovery messaging, type checking, linting, and the full unit suite.

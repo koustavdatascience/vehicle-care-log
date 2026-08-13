@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const source = readFileSync(resolve(process.cwd(), "app/(tabs)/settings.tsx"), "utf8");
+const documentation = readFileSync(resolve(process.cwd(), "docs/CSV_EXPORT.md"), "utf8");
 
 describe("Phase 3 Settings CSV export contract", () => {
   it("keeps export scoped to a selected local vehicle with an accessible share action", () => {
@@ -19,5 +20,11 @@ describe("Phase 3 Settings CSV export contract", () => {
     expect(source).toContain('accessibilityRole="alert"');
     expect(source).not.toContain("error.message");
     expect(source).not.toContain("console.error");
+  });
+
+  it("explains the selected sharing destination and documents temporary-file handling", () => {
+    expect(source).toContain("then may be copied by the app you choose from the share sheet");
+    expect(documentation).toContain("If file creation or sharing fails after a report was written, the app attempts to delete that partial cached file");
+    expect(documentation).toContain("does not require an account, cloud sync, an AI service, or an internet connection");
   });
 });

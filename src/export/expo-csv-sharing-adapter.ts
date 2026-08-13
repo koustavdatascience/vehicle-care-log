@@ -12,6 +12,9 @@ export function createExpoCsvFileService(): NativeCsvFileService {
       writeAsStringAsync: async (uri, contents) => {
         await FileSystem.writeAsStringAsync(uri, contents, { encoding: FileSystem.EncodingType.UTF8 });
       },
+      deleteAsync: async (uri) => {
+        await FileSystem.deleteAsync(uri, { idempotent: true });
+      },
     },
     {
       isAvailableAsync: () => Sharing.isAvailableAsync(),

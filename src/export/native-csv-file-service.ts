@@ -9,6 +9,7 @@ export type CsvShareOutcome =
 export interface CsvFileWriter {
   cacheDirectory: string | null;
   writeAsStringAsync(uri: string, contents: string, options: { encoding: "utf8" }): Promise<void>;
+  deleteAsync?(uri: string, options: { idempotent: true }): Promise<void>;
 }
 
 export interface CsvNativeSharing {
@@ -30,8 +31,9 @@ export class NativeCsvFileService {
       return { status: "unavailable" };
     }
 
+    let uri: string | null = null;
     try {
-      const uri = `${this.fileWriter.cacheDirectory}${result.fileName}`;
+      uri = `${this.fileWriter.cacheDirectory}${result.fileName}`;
       await this.fileWriter.writeAsStringAsync(uri, result.csv, { encoding: "utf8" });
       await this.sharing.shareAsync(uri, {
         dialogTitle: "Export vehicle care report",
@@ -41,7 +43,15 @@ export class NativeCsvFileService {
       return { status: "shared", rowCount: result.rowCount };
     } catch {
       // File paths and native share errors can contain personal information.
-      // The caller receives only a bounded recovery state.
+      // Remove a partial report where possible. A successfully shared report is
+      // retained in the OS cache so the destination app can finish receiving it.
+      if (uri) {
+        try {
+          await this.fileWriter.deleteAsync?.(uri, { idempotent: true });
+        } catch {
+          // Cleanup failure must not expose local paths or native error details.
+        }
+      }
       return { status: "failed" };
     }
   }
