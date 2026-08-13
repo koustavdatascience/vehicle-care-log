@@ -51,3 +51,4 @@
 - [ ] Supabase migration: Define the protected schema, row-level security, secure environment boundary, conflict protocol, data deletion flow, and deployment migration guide.
 - [ ] Supabase migration: Implement, test, checkpoint, and push the optional Supabase-backed sync integration.
 - [x] Maintenance: Add a read-only app-version row to Settings so users can identify the installed Vehicle Care Log release when seeking support.
+- [x] CSV export Phase 1: Configure future commit attribution for the repository and define the local-only CSV export contract, privacy boundary, and deterministic tests.
