@@ -1,0 +1,3 @@
+import { describe, expect, it } from "vitest";
+import { feedbackStates, getFeedbackMessage } from "../../src/ui/feedback-contract";
+describe("Phase 3 feedback-state contract", () => { it("covers every required empty, failure, and access state", () => { expect(feedbackStates).toEqual(["loading", "empty", "error", "success", "offline", "permission-denied"]); }); it("returns specific user-facing guidance for no-data, offline, and denied-permission states", () => { expect(getFeedbackMessage("empty")).toMatch(/Nothing has been recorded/i); expect(getFeedbackMessage("offline")).toMatch(/offline/i); expect(getFeedbackMessage("permission-denied")).toMatch(/Settings/i); }); });
