@@ -13,9 +13,9 @@
 - [x] Phase 3: Implement theme tokens, shared components, tab navigation, stack navigation, and empty/loading/error states.
 - [x] Phase 3: Test the navigation shell, safe-area behavior, accessibility labels, first-run state, and visual states on supported platforms.
 - [x] Phase 3: Commit and push the tested design system and navigation shell.
-- [ ] Phase 4: Implement domain types, SQLite schema, migrations, repositories, validation, seeded fixtures, and local persistence recovery.
-- [ ] Phase 4: Test missing data, storage failure, invalid/negative values, future odometer values, duplicate records, migration, restart, and deletion behavior.
-- [ ] Phase 4: Commit and push the tested local data architecture.
+- [x] Phase 4: Implement domain types, SQLite schema, migrations, repositories, validation, seeded fixtures, and local persistence recovery.
+- [x] Phase 4: Test missing data, storage failure, invalid/negative values, future odometer values, duplicate records, migration, restart, and deletion behavior.
+- [x] Phase 4: Commit and push the tested local data architecture.
 - [ ] Phase 5: Implement vehicle profiles and fuel, service, and repair create/read/update/delete workflows.
 - [ ] Phase 5: Test first vehicle, empty records, invalid forms, duplicate entries, out-of-order odometers, edit/delete confirmation, and persistence after restart.
 - [ ] Phase 5: Commit and push the tested vehicle and record workflows.
