@@ -37,6 +37,8 @@
 - [x] Phase 7: Implement vehicle-aware reminder create, edit, complete, snooze, and reschedule flows.
 - [x] Phase 7: Add local notification permission, scheduling, cancellation, and deep-link handling with recovery feedback.
 - [x] Phase 7: Add deterministic tests for notification denial, timezone-safe schedule calculations, duplicate prevention, restart recovery, and due-status boundaries.
+- [x] CI repair: Inspect and correct the Phase 7 GitHub Quality Gate failure.
+- [ ] CI repair: Re-run local validation, checkpoint, push, and confirm the GitHub workflow succeeds.
 - [ ] Phase 8: Implement approved account, cloud sync, attachment, and backup capabilities only after the local-first flows are stable.
 - [ ] Phase 8: Test offline outbox handling, conflict resolution, upload failure, account recovery, data deletion, and retry behavior.
 - [ ] Phase 8: Commit and push the tested connected-data capabilities.
