@@ -18,7 +18,7 @@
 - [x] Phase 4: Commit and push the tested local data architecture.
 - [x] Phase 5: Implement vehicle profiles and fuel, service, and repair create/read/update/delete workflows.
 - [x] Phase 5: Test first vehicle, empty records, invalid forms, duplicate entries, out-of-order odometers, edit/delete confirmation, and persistence after restart.
-- [ ] Phase 5: Commit and push the tested vehicle and record workflows.
+- [x] Phase 5: Commit and push the tested vehicle and record workflows.
 - [x] Phase 5: Add persisted active-vehicle state and operational vehicle selection.
 - [x] Phase 5: Add vehicle create, edit, archive, list, and empty-state screens.
 - [x] Phase 5: Add validated fuel, service, and repair creation, update, list, detail, and deletion workflows.
