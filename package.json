@@ -17,6 +17,7 @@
     "test:watch": "vitest",
     "quality": "pnpm check && pnpm lint && pnpm test",
     "qualify": "pnpm quality",
+    "release:config": "expo config --type public",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "android": "expo start --android",
     "ios": "expo start --ios",

@@ -45,8 +45,9 @@
 - [x] Phase 9: Complete accessibility, privacy, performance, reliability, analytics, and broad automated test coverage.
 - [x] Phase 9: Test assistive technology readiness, Dynamic Type layout contracts, low-storage and poor-network recovery paths, sensitive-log redaction, large data sets, and regression-suite behavior; retain the native pilot checklist for device validation.
 - [x] Phase 9: Commit and push the tested quality hardening.
-- [ ] Phase 10: Prepare release configuration, pilot checklist, support materials, versioning, and final delivery documentation.
-- [ ] Phase 10: Validate signed release candidates, smoke-test critical journeys, confirm release notes, and push the final release-preparation commit.
+- [x] Phase 10: Prepare release configuration, pilot checklist, support materials, versioning, and final delivery documentation.
+- [x] Phase 10: Run deterministic migration, sync/backup recovery, notification, core-record, release-config, and documentation rehearsals; push the final release-preparation commit.
+- [ ] Release owner gate: Build signed iOS and Android pilot candidates, complete the physical-device smoke matrix, provide store privacy/support URLs and screenshots, then publish only after recorded approval.
 - [x] Phase 8: Define a local-first optional-auth, outbox, conflict, attachment, and backup architecture decision record.
 - [x] Phase 8: Implement account-aware sync state, offline outbox retry, conflict resolution, portable backup, and attachment workflows.
 - [x] Phase 8: Add connected-data failure, recovery, and migration coverage without making offline use dependent on a network.
@@ -55,4 +56,4 @@
 - [x] Phase 9 hotfix: Replace raw OAuth launcher logging with safe diagnostics and add a deterministic privacy regression test.
 - [x] Phase 9 hotfix: Replace raw OAuth callback logging and exception-derived error UI with safe diagnostics and generic recovery messaging.
 - [x] Phase 9 hotfix: Exclude unused owner identity values from mobile-public environment mapping and add a privacy regression contract.
-- [ ] Phase 10: Complete versioning, release configuration, pilot checklist, support content, and final release-validation documentation.
+- [x] Phase 10: Complete versioning, release configuration, pilot checklist, support content, and final release-validation documentation.
