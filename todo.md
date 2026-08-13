@@ -23,9 +23,13 @@
 - [x] Phase 5: Add vehicle create, edit, archive, list, and empty-state screens.
 - [x] Phase 5: Add validated fuel, service, and repair creation, update, list, detail, and deletion workflows.
 - [x] Phase 5: Add deterministic tests for vehicle, service, and repair repositories and active-vehicle persistence.
-- [ ] Phase 6: Implement dashboard summaries, history filters, expense calculations, report states, and linked drill-down views.
-- [ ] Phase 6: Test zero data, mixed currencies or units, period changes, correct totals, rounded amounts, due-soon and overdue boundaries, and linked-record navigation.
+- [x] Phase 6: Implement dashboard summaries, history filters, expense calculations, report states, and linked drill-down views.
+- [x] Phase 6: Test zero data, mixed currencies or units, period changes, correct totals, rounded amounts, due-soon and overdue boundaries, and linked-record navigation.
 - [ ] Phase 6: Commit and push the tested dashboard, history, expenses, and reports.
+- [x] Phase 6: Add bounded local presentation selectors for dashboard, history, and expense reporting.
+- [x] Phase 6: Implement active-vehicle dashboard cards, recent records, quick actions, and no-data states.
+- [x] Phase 6: Implement filterable history and period-scoped expense breakdowns with source-record navigation.
+- [x] Phase 6: Add deterministic view-model tests for zero data, vehicle/period filters, category totals, fuel-efficiency completeness, and drill-down targets.
 - [ ] Phase 7: Implement reminder rules, local notifications, deep links, permission states, and settings.
 - [ ] Phase 7: Test denied permission, rescheduling, duplicate prevention, timezone changes, app restart, no internet, due/overdue boundaries, and settings recovery.
 - [ ] Phase 7: Commit and push the tested reminders, notifications, and settings.
