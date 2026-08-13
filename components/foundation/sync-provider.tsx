@@ -2,6 +2,8 @@ import { createContext, type ReactNode, useCallback, useContext, useEffect, useM
 
 import { useAuth } from "@/hooks/use-auth";
 import { createTRPCClient } from "@/lib/trpc";
+import { recordSafeAnalytics } from "@/src/diagnostics/safe-analytics";
+import { safeDiagnostic, safeDiagnosticError } from "@/src/diagnostics/safe-diagnostics";
 import type { AccountLinkDecision, SyncAccountState, SyncEnvelope } from "@/src/domain/models";
 import { LocalSyncRepository } from "@/src/sync/local-sync-repository";
 import { useLocalDatabase } from "./local-storage-provider";
@@ -37,7 +39,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     const state = await repository.getAccountState();
     setAccount(state);
-    setStatus(state.accountId ? "ready" : "local-only");
+    setStatus(state.accountId ? (state.lastError ? "offline" : "ready") : "local-only");
   }, [repository]);
 
   useEffect(() => {
@@ -68,6 +70,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     setAccount(await repository.getAccountState());
     setStatus("syncing");
     setMessage(null);
+    recordSafeAnalytics("sync_started", { decision: linkDecision });
 
     try {
       if (linkDecision === "upload-device") {
@@ -75,6 +78,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         const outgoing = await repository.listDueOutbox();
         if (outgoing.length) {
           const result = await client.sync.push.mutate({ changes: outgoing });
+          safeDiagnostic("sync.push_conflicts", { conflictCount: result.conflicts.length });
           for (const accepted of result.accepted) await repository.acknowledge(accepted.entityType, accepted.entityId);
           for (const conflict of result.conflicts) {
             const local = outgoing.find((item) => item.entityType === conflict.entityType && item.entityId === conflict.entityId);
@@ -94,12 +98,14 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       setAccount(await repository.getAccountState());
       setStatus(hasConflict ? "conflict" : "ready");
       setMessage(hasConflict ? "A newer version exists on another device. Local conflicts were preserved for review." : "Backup is up to date.");
+      recordSafeAnalytics("sync_completed", { hadConflict: hasConflict });
     } catch (error) {
-      const detail = error instanceof Error ? error.message : "Sync could not connect.";
-      await repository.deferFailure(detail);
+      safeDiagnosticError("sync.failed", error, { hasAccount: true });
+      await repository.deferFailure();
       setAccount(await repository.getAccountState());
       setStatus("offline");
-      setMessage("Your changes stay on this device and will be retried later. " + detail);
+      setMessage("Backup could not reach the service. Your local records remain available. Try again when connected.");
+      recordSafeAnalytics("sync_failed", { hasAccount: true });
     }
   }, [client.sync.pull, client.sync.push, repository, user]);
 

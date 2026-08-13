@@ -19,6 +19,7 @@ const entities: readonly { type: SyncEntityType; table: string }[] = [
   { type: "attachment", table: "attachments" },
 ];
 const tableFor = new Map(entities.map((item) => [item.type, item.table]));
+export const GENERIC_SYNC_RECOVERY_REASON = "Sync unavailable. Retry when connectivity returns.";
 
 function parseRecord(value: string): Record<string, unknown> {
   const parsed = JSON.parse(value) as unknown;
@@ -124,14 +125,15 @@ export class LocalSyncRepository {
     });
   }
 
-  async deferFailure(error: string, now = new Date()): Promise<void> {
+  /** Persists a generic retry state only; raw network or server failures never enter local storage. */
+  async deferFailure(now = new Date()): Promise<void> {
     const retryAt = new Date(now.getTime() + 60_000).toISOString();
     await this.database.runAsync(
       "UPDATE sync_outbox SET attempt_count = attempt_count + 1, next_retry_at = ?, last_error = ?",
       retryAt,
-      error.slice(0, 500),
+      GENERIC_SYNC_RECOVERY_REASON,
     );
-    await this.database.runAsync("UPDATE sync_account_state SET last_error = ? WHERE singleton = 1", error.slice(0, 500));
+    await this.database.runAsync("UPDATE sync_account_state SET last_error = ? WHERE singleton = 1", GENERIC_SYNC_RECOVERY_REASON);
   }
 
   async recordConflict(local: SyncEnvelope, remote: SyncEnvelope): Promise<void> {

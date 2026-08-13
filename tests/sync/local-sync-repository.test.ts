@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { SqlDatabase } from "../../src/data/database-contract";
 import type { SyncEnvelope } from "../../src/domain/models";
-import { LocalSyncRepository } from "../../src/sync/local-sync-repository";
+import { GENERIC_SYNC_RECOVERY_REASON, LocalSyncRepository } from "../../src/sync/local-sync-repository";
 
 class FakeSyncDatabase implements SqlDatabase {
   runCalls: Array<{ source: string; parameters: unknown[] }> = [];
@@ -66,14 +66,16 @@ describe("Phase 8 local sync repository", () => {
     expect(due).toEqual([{ entityType: "vehicle", entityId: "vehicle-local", operation: "delete", updatedAt: "2026-10-02T00:00:00.000Z", deletedAt: "2026-10-02T00:00:00.000Z", payload: { nickname: "City" } }]);
   });
 
-  it("defers offline failures with a bounded retry and retains the recovery reason", async () => {
+  it("defers offline failures with a bounded retry and retains only a generic recovery reason", async () => {
     const database = new FakeSyncDatabase();
     const repository = new LocalSyncRepository(database);
-    await repository.deferFailure("offline", new Date("2026-10-01T10:00:00.000Z"));
+    await repository.deferFailure(new Date("2026-10-01T10:00:00.000Z"));
 
     expect(database.runCalls[0].source).toContain("attempt_count = attempt_count + 1");
     expect(database.runCalls[0].parameters[0]).toBe("2026-10-01T10:01:00.000Z");
+    expect(database.runCalls[0].parameters[1]).toBe(GENERIC_SYNC_RECOVERY_REASON);
     expect(database.runCalls[1].source).toContain("last_error");
+    expect(database.runCalls[1].parameters[0]).toBe(GENERIC_SYNC_RECOVERY_REASON);
   });
 
   it("retains newer unsynced local data as a conflict instead of overwriting it", async () => {

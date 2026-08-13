@@ -16,6 +16,8 @@ import { layoutTokens } from "@/constants/design-tokens";
 import { startOAuthLogin } from "@/constants/oauth";
 import { useAuth } from "@/hooks/use-auth";
 import { useColors } from "@/hooks/use-colors";
+import { recordSafeAnalytics } from "@/src/diagnostics/safe-analytics";
+import { safeDiagnosticError } from "@/src/diagnostics/safe-diagnostics";
 import { cancelReminderNotification, requestLocalNotificationPermission, syncReminderNotification } from "@/src/notifications/local-notification-adapter";
 import { LocalReminderRepository } from "@/src/repositories/local-repositories";
 import { exportPortableBackup } from "@/src/sync/attachment-and-backup-service";
@@ -61,7 +63,12 @@ export default function SettingsScreen() {
     try {
       const result = await exportPortableBackup(database);
       setBackupNotice(result.shared ? "Backup created and opened in the device share sheet." : "Backup created locally. Sharing is unavailable on this device.");
-    } catch (cause) { setBackupNotice(cause instanceof Error ? cause.message : "Backup could not be created."); } finally { setBackingUp(false); }
+      recordSafeAnalytics("backup_exported", { shared: result.shared });
+    } catch (cause) {
+      safeDiagnosticError("backup.export_failed", cause);
+      recordSafeAnalytics("backup_export_failed");
+      setBackupNotice("Backup could not be created. Your records remain on this device; please try again.");
+    } finally { setBackingUp(false); }
   };
   const beginAccountLink = async () => {
     try { await startOAuthLogin(); } catch { setBackupNotice("The account-link page could not be opened. Your records remain stored locally."); }

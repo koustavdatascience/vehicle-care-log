@@ -23,6 +23,7 @@ import { LocalStorageProvider } from "@/components/foundation/local-storage-prov
 import { SyncProvider } from "@/components/foundation/sync-provider";
 import { VehicleProvider } from "@/components/foundation/vehicle-provider";
 import { PreferencesProvider } from "@/components/foundation/preferences-provider";
+import { AppErrorBoundary } from "@/components/foundation/app-error-boundary";
 import { notificationReminderId } from "@/src/notifications/reminder-notification-policy";
 
 const DEFAULT_WEB_INSETS: EdgeInsets = { top: 0, right: 0, bottom: 0, left: 0 };
@@ -101,6 +102,7 @@ export default function RootLayout() {
 
   const content = (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <AppErrorBoundary>
       <trpc.Provider client={trpcClient} queryClient={queryClient}>
         <QueryClientProvider client={queryClient}>
           <LocalStorageProvider>
@@ -126,6 +128,7 @@ export default function RootLayout() {
           </LocalStorageProvider>
         </QueryClientProvider>
       </trpc.Provider>
+      </AppErrorBoundary>
     </GestureHandlerRootView>
   );
 
