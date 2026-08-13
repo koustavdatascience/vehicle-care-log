@@ -1,0 +1,35 @@
+flowchart LR
+  subgraph Mobile[Mobile client: iOS / Android]
+    UI[Screen and component layer]
+    Features[Feature modules]
+    Domain[Domain services and calculations]
+    Repo[Repository interfaces]
+    DB[(SQLite local database)]
+    Outbox[(Sync outbox and cursor)]
+    Notify[Local notification scheduler]
+    Secure[Secure token storage]
+  end
+
+  subgraph Cloud[Optional cloud services]
+    API[Typed HTTPS API]
+    Auth[OAuth and session service]
+    SQL[(Relational database)]
+    Blob[Object storage for attachments]
+    Push[Optional push delivery]
+    Obs[Logs, metrics, crash events]
+  end
+
+  UI --> Features
+  Features --> Domain
+  Domain --> Repo
+  Repo --> DB
+  Repo --> Outbox
+  Domain --> Notify
+  Features --> Secure
+  Outbox -->|push and pull when online| API
+  API --> Auth
+  API --> SQL
+  API --> Blob
+  API --> Push
+  UI -.-> Obs
+  API -.-> Obs
