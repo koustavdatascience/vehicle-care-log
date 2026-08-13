@@ -40,4 +40,11 @@ describe("Phase 2 project contract", () => {
     expect(config).not.toContain("expo-video");
     expect(config).not.toContain("POST_NOTIFICATIONS");
   });
+
+  it("uses a stable local-first Expo command by default while retaining an explicit future full-stack command", () => {
+    const packageJson = readFileSync(resolve(projectRoot, "package.json"), "utf8");
+
+    expect(packageJson).toContain('"dev": "pnpm dev:metro"');
+    expect(packageJson).toContain('"dev:full": "concurrently -k \\"pnpm dev:server\\" \\"pnpm dev:metro\\""');
+  });
 });

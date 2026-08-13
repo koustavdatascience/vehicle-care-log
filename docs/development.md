@@ -8,7 +8,8 @@ The project is an Expo Router application using TypeScript, React Native, Native
 
 | Command | Purpose |
 |---|---|
-| `pnpm dev` | Start the development services and Expo web runtime. |
+| `pnpm dev` | Start the local-first Expo development runtime without restarting an unused backend watcher. |
+| `pnpm dev:full` | Start both Expo and the backend service when a later approved phase needs server features. |
 | `pnpm check` | Run the TypeScript compiler without emitting files. |
 | `pnpm lint` | Run Expo lint checks. |
 | `pnpm test` | Run deterministic unit tests once. |
