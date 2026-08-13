@@ -7,7 +7,7 @@ export interface Migration {
   sql: string;
 }
 
-export const LOCAL_SCHEMA_VERSION = 1;
+export const LOCAL_SCHEMA_VERSION = 2;
 
 export const migrations: readonly Migration[] = [
   {
@@ -129,6 +129,17 @@ export const migrations: readonly Migration[] = [
       CREATE INDEX IF NOT EXISTS idx_reminders_due ON reminders(vehicle_id, due_on) WHERE deleted_at IS NULL AND completed_at IS NULL;
       CREATE INDEX IF NOT EXISTS idx_expenses_vehicle_date ON expense_projections(vehicle_id, occurred_on DESC) WHERE deleted_at IS NULL;
       CREATE UNIQUE INDEX IF NOT EXISTS idx_fuel_dedup_active ON fuel_entries(duplicate_fingerprint) WHERE deleted_at IS NULL;
+    `,
+  },
+  {
+    version: 2,
+    name: "reminder-lifecycle-and-notification-metadata",
+    sql: `
+      ALTER TABLE reminders ADD COLUMN recurrence TEXT NOT NULL DEFAULT 'none';
+      ALTER TABLE reminders ADD COLUMN notification_id TEXT;
+      ALTER TABLE reminders ADD COLUMN notification_lead_days INTEGER NOT NULL DEFAULT 7;
+      ALTER TABLE reminders ADD COLUMN note TEXT;
+      CREATE INDEX IF NOT EXISTS idx_reminders_open_vehicle ON reminders(vehicle_id, completed_at, deleted_at, due_on);
     `,
   },
 ];

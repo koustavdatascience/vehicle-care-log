@@ -129,6 +129,45 @@ export function validateRepairDraft(
   return issues.length ? { ok: false, issues } : { ok: true };
 }
 
+export function validateReminderDraft(
+  reminder: Pick<Reminder, "title" | "dueOn" | "dueOdometerKm" | "recurrence" | "notificationLeadDays" | "snoozedUntil">,
+): ValidationResult {
+  const issues: ValidationIssue[] = [];
+  if (!reminder.title.trim()) issues.push(issue("title", "required", "Enter a reminder title."));
+  if (reminder.dueOn === null && reminder.dueOdometerKm === null) {
+    issues.push(issue("due", "required", "Add a due date, due mileage, or both."));
+  }
+  if (reminder.dueOn !== null && !isValidIsoDate(reminder.dueOn)) {
+    issues.push(issue("dueOn", "invalid-date", "Enter a valid due date."));
+  }
+  if (reminder.dueOdometerKm !== null) {
+    const mileage = validateNonNegativeInteger("dueOdometerKm", reminder.dueOdometerKm);
+    if (!mileage.ok) issues.push(...mileage.issues);
+  }
+  if (reminder.snoozedUntil !== null && !isValidIsoDate(reminder.snoozedUntil)) {
+    issues.push(issue("snoozedUntil", "invalid-date", "Enter a valid snooze date."));
+  }
+  if (!Number.isInteger(reminder.notificationLeadDays) || reminder.notificationLeadDays < 0 || reminder.notificationLeadDays > 30) {
+    issues.push(issue("notificationLeadDays", "invalid-value", "Notification lead time must be between 0 and 30 days."));
+  }
+  if (!["none", "monthly", "yearly"].includes(reminder.recurrence)) {
+    issues.push(issue("recurrence", "invalid-value", "Choose a valid recurrence."));
+  }
+  if (reminder.recurrence !== "none" && reminder.dueOn === null) {
+    issues.push(issue("recurrence", "invalid-value", "Recurring reminders need a due date."));
+  }
+  return issues.length ? { ok: false, issues } : { ok: true };
+}
+
+export function getNextReminderDueOn(dueOn: string, recurrence: Reminder["recurrence"]): string | null {
+  if (recurrence === "none" || !isValidIsoDate(dueOn)) return null;
+  const [year, month, day] = dueOn.split("-").map(Number);
+  const targetYear = recurrence === "yearly" ? year + 1 : year + Math.floor(month / 12);
+  const targetMonth = recurrence === "yearly" ? month : (month % 12) + 1;
+  const lastDay = new Date(Date.UTC(targetYear, targetMonth, 0)).getUTCDate();
+  return new Date(Date.UTC(targetYear, targetMonth - 1, Math.min(day, lastDay))).toISOString().slice(0, 10);
+}
+
 export function calculateExpenseTotal(entries: readonly ExpenseProjection[], currency: Money["currency"] = "INR"): Money {
   return {
     currency,
@@ -145,11 +184,14 @@ export function calculateFuelEfficiency(previous: FuelEntry | null, current: Fue
 
 export type ReminderStatus = "complete" | "overdue" | "due-soon" | "upcoming" | "unavailable";
 
-export function getReminderStatus(reminder: Reminder, today: string, leadDays = 7): ReminderStatus {
+export function getReminderStatus(reminder: Reminder, today: string, leadDays = 7, currentOdometerKm: number | null = null): ReminderStatus {
   if (reminder.completedAt) return "complete";
-  if (!reminder.dueOn) return "unavailable";
-  if (reminder.dueOn < today) return "overdue";
-  const due = Date.parse(`${reminder.dueOn}T00:00:00.000Z`);
+  if (reminder.snoozedUntil && reminder.snoozedUntil > today) return "upcoming";
+  const effectiveDueOn = reminder.snoozedUntil ?? reminder.dueOn;
+  if (effectiveDueOn && effectiveDueOn < today) return "overdue";
+  if (reminder.dueOdometerKm !== null && currentOdometerKm !== null && currentOdometerKm >= reminder.dueOdometerKm) return "due-soon";
+  if (!effectiveDueOn) return "unavailable";
+  const due = Date.parse(`${effectiveDueOn}T00:00:00.000Z`);
   const current = Date.parse(`${today}T00:00:00.000Z`);
   return due - current <= leadDays * 86_400_000 ? "due-soon" : "upcoming";
 }

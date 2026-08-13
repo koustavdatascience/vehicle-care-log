@@ -80,6 +80,10 @@ export interface Reminder {
   title: string;
   dueOn: string | null;
   dueOdometerKm: number | null;
+  recurrence: "none" | "monthly" | "yearly";
+  notificationId: string | null;
+  notificationLeadDays: number;
+  note: string | null;
   completedAt: string | null;
   snoozedUntil: string | null;
   createdAt: string;
@@ -114,3 +118,4 @@ export type VehicleDraft = Omit<Vehicle, "createdAt" | "updatedAt" | "archivedAt
 export type FuelDraft = Omit<FuelEntry, "createdAt" | "updatedAt" | "deletedAt" | "syncState">;
 export type ServiceDraft = Omit<ServiceRecord, "createdAt" | "updatedAt" | "deletedAt" | "syncState">;
 export type RepairDraft = Omit<RepairRecord, "createdAt" | "updatedAt" | "deletedAt" | "syncState">;
+export type ReminderDraft = Omit<Reminder, "createdAt" | "updatedAt" | "deletedAt" | "syncState">;

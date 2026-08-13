@@ -1,4 +1,4 @@
-import type { FuelDraft, FuelEntry, RepairDraft, RepairRecord, ServiceDraft, ServiceRecord, Vehicle, VehicleDraft, VehicleId } from "../domain/models";
+import type { FuelDraft, FuelEntry, Reminder, ReminderDraft, RepairDraft, RepairRecord, ServiceDraft, ServiceRecord, Vehicle, VehicleDraft, VehicleId } from "../domain/models";
 
 export interface VehicleRepository {
   create(draft: VehicleDraft): Promise<Vehicle>;
@@ -30,5 +30,17 @@ export interface RepairRepository {
   findById(id: string): Promise<RepairRecord | null>;
   listForVehicle(vehicleId: VehicleId): Promise<RepairRecord[]>;
   update(draft: RepairDraft, today: string): Promise<RepairRecord>;
+  softDelete(id: string): Promise<void>;
+}
+
+export interface ReminderRepository {
+  create(draft: ReminderDraft): Promise<Reminder>;
+  findById(id: string): Promise<Reminder | null>;
+  listForVehicle(vehicleId: VehicleId): Promise<Reminder[]>;
+  listOpenForVehicle(vehicleId: VehicleId): Promise<Reminder[]>;
+  update(draft: ReminderDraft): Promise<Reminder>;
+  complete(id: string, completedAt: string): Promise<{ completed: Reminder; nextReminder: Reminder | null }>;
+  snooze(id: string, snoozedUntil: string): Promise<Reminder>;
+  setNotificationId(id: string, notificationId: string | null): Promise<void>;
   softDelete(id: string): Promise<void>;
 }

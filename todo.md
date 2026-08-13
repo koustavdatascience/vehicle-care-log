@@ -30,9 +30,13 @@
 - [x] Phase 6: Implement active-vehicle dashboard cards, recent records, quick actions, and no-data states.
 - [x] Phase 6: Implement filterable history and period-scoped expense breakdowns with source-record navigation.
 - [x] Phase 6: Add deterministic view-model tests for zero data, vehicle/period filters, category totals, fuel-efficiency completeness, and drill-down targets.
-- [ ] Phase 7: Implement reminder rules, local notifications, deep links, permission states, and settings.
-- [ ] Phase 7: Test denied permission, rescheduling, duplicate prevention, timezone changes, app restart, no internet, due/overdue boundaries, and settings recovery.
+- [x] Phase 7: Implement reminder rules, local notifications, deep links, permission states, and settings.
+- [x] Phase 7: Test denied permission, rescheduling, duplicate prevention, timezone changes, app restart, no internet, due/overdue boundaries, and settings recovery.
 - [ ] Phase 7: Commit and push the tested reminders, notifications, and settings.
+- [x] Phase 7: Add reminder repository operations and pure schedule, duplicate, and status policies.
+- [x] Phase 7: Implement vehicle-aware reminder create, edit, complete, snooze, and reschedule flows.
+- [x] Phase 7: Add local notification permission, scheduling, cancellation, and deep-link handling with recovery feedback.
+- [x] Phase 7: Add deterministic tests for notification denial, timezone-safe schedule calculations, duplicate prevention, restart recovery, and due-status boundaries.
 - [ ] Phase 8: Implement approved account, cloud sync, attachment, and backup capabilities only after the local-first flows are stable.
 - [ ] Phase 8: Test offline outbox handling, conflict resolution, upload failure, account recovery, data deletion, and retry behavior.
 - [ ] Phase 8: Commit and push the tested connected-data capabilities.

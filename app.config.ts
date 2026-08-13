@@ -82,6 +82,12 @@ const config: ExpoConfig = {
     ],
     "expo-sqlite",
     [
+      "expo-notifications",
+      {
+        "defaultChannel": "vehicle-care-reminders",
+      },
+    ],
+    [
       "expo-splash-screen",
       {
         image: "./assets/images/splash-icon.png",

@@ -1,9 +1,9 @@
 import type { SqlDatabase } from "../data/database-contract";
 import { LocalStorageError } from "../data/database-contract";
-import type { FuelDraft, FuelEntry, RepairDraft, RepairRecord, ServiceDraft, ServiceRecord, Vehicle, VehicleDraft, VehicleId } from "../domain/models";
-import { validateDateNotInFuture, validateOdometerProgression, validateRepairDraft, validateServiceDraft, validateVehicleDraft, type ValidationResult } from "../domain/services";
+import type { FuelDraft, FuelEntry, Reminder, ReminderDraft, RepairDraft, RepairRecord, ServiceDraft, ServiceRecord, Vehicle, VehicleDraft, VehicleId } from "../domain/models";
+import { getNextReminderDueOn, validateDateNotInFuture, validateOdometerProgression, validateReminderDraft, validateRepairDraft, validateServiceDraft, validateVehicleDraft, type ValidationResult } from "../domain/services";
 
-import type { FuelRepository, RepairRepository, ServiceRepository, VehicleRepository } from "./contracts";
+import type { FuelRepository, ReminderRepository, RepairRepository, ServiceRepository, VehicleRepository } from "./contracts";
 
 function now(): string {
   return new Date().toISOString();
@@ -53,6 +53,16 @@ function rowToRepair(row: Record<string, unknown>): RepairRecord {
     occurredOn: String(row.occurred_on), odometerKm: Number(row.odometer_km), provider: row.provider as string | null,
     cost: amountMinor === null ? null : { amountMinor: Number(amountMinor), currency: row.currency as "INR" }, note: row.note as string | null,
     createdAt: String(row.created_at), updatedAt: String(row.updated_at), deletedAt: row.deleted_at as string | null, syncState: row.sync_state as RepairRecord["syncState"],
+  };
+}
+
+function rowToReminder(row: Record<string, unknown>): Reminder {
+  return {
+    id: String(row.id), vehicleId: String(row.vehicle_id), title: String(row.title), dueOn: row.due_on as string | null,
+    dueOdometerKm: row.due_odometer_km as number | null, recurrence: (row.recurrence ?? "none") as Reminder["recurrence"],
+    notificationId: (row.notification_id ?? null) as string | null, notificationLeadDays: Number(row.notification_lead_days ?? 7),
+    note: (row.note ?? null) as string | null, completedAt: row.completed_at as string | null, snoozedUntil: row.snoozed_until as string | null,
+    createdAt: String(row.created_at), updatedAt: String(row.updated_at), deletedAt: row.deleted_at as string | null, syncState: row.sync_state as Reminder["syncState"],
   };
 }
 
@@ -414,6 +424,126 @@ export class LocalRepairRepository implements RepairRepository {
       });
     } catch (error) {
       throw new LocalStorageError("write-failed", "Repair record could not be deleted. Please retry.", error);
+    }
+  }
+}
+
+export class LocalReminderRepository implements ReminderRepository {
+  constructor(private readonly database: SqlDatabase) {}
+
+  async create(draft: ReminderDraft): Promise<Reminder> {
+    requireValid(validateReminderDraft(draft));
+    const timestamp = now();
+    try {
+      await this.database.withTransactionAsync(async () => {
+        await requireActiveVehicle(this.database, draft.vehicleId);
+        const duplicate = await this.database.getFirstAsync<{ id: string }>(
+          "SELECT id FROM reminders WHERE vehicle_id = ? AND title = ? AND due_on IS ? AND due_odometer_km IS ? AND completed_at IS NULL AND deleted_at IS NULL AND id != ?",
+          draft.vehicleId, draft.title.trim(), draft.dueOn, draft.dueOdometerKm, draft.id,
+        );
+        if (duplicate) throw new LocalStorageError("write-failed", "This reminder appears to be a duplicate.");
+        await this.database.runAsync(
+          "INSERT INTO reminders (id, vehicle_id, title, due_on, due_odometer_km, recurrence, notification_id, notification_lead_days, note, snoozed_until, created_at, updated_at, sync_state) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'local')",
+          draft.id, draft.vehicleId, draft.title.trim(), draft.dueOn, draft.dueOdometerKm, draft.recurrence, draft.notificationId, draft.notificationLeadDays, nullableText(draft.note), draft.snoozedUntil, timestamp, timestamp,
+        );
+      });
+      return { ...draft, title: draft.title.trim(), note: nullableText(draft.note), completedAt: null, createdAt: timestamp, updatedAt: timestamp, deletedAt: null, syncState: "local" };
+    } catch (error) {
+      if (error instanceof LocalStorageError) throw error;
+      throw new LocalStorageError("write-failed", "Reminder could not be saved. Please retry.", error);
+    }
+  }
+
+  async findById(id: string): Promise<Reminder | null> {
+    const row = await this.database.getFirstAsync<Record<string, unknown>>("SELECT * FROM reminders WHERE id = ? AND deleted_at IS NULL", id);
+    return row ? rowToReminder(row) : null;
+  }
+
+  async listForVehicle(vehicleId: VehicleId): Promise<Reminder[]> {
+    const rows = await this.database.getAllAsync<Record<string, unknown>>("SELECT * FROM reminders WHERE vehicle_id = ? AND deleted_at IS NULL ORDER BY completed_at IS NULL DESC, COALESCE(snoozed_until, due_on) ASC, created_at DESC", vehicleId);
+    return rows.map(rowToReminder);
+  }
+
+  async listOpenForVehicle(vehicleId: VehicleId): Promise<Reminder[]> {
+    const rows = await this.database.getAllAsync<Record<string, unknown>>("SELECT * FROM reminders WHERE vehicle_id = ? AND completed_at IS NULL AND deleted_at IS NULL ORDER BY COALESCE(snoozed_until, due_on) ASC, created_at DESC", vehicleId);
+    return rows.map(rowToReminder);
+  }
+
+  async update(draft: ReminderDraft): Promise<Reminder> {
+    requireValid(validateReminderDraft(draft));
+    const timestamp = now();
+    try {
+      await this.database.withTransactionAsync(async () => {
+        await requireActiveVehicle(this.database, draft.vehicleId);
+        const duplicate = await this.database.getFirstAsync<{ id: string }>(
+          "SELECT id FROM reminders WHERE vehicle_id = ? AND title = ? AND due_on IS ? AND due_odometer_km IS ? AND completed_at IS NULL AND deleted_at IS NULL AND id != ?",
+          draft.vehicleId, draft.title.trim(), draft.dueOn, draft.dueOdometerKm, draft.id,
+        );
+        if (duplicate) throw new LocalStorageError("write-failed", "This reminder appears to be a duplicate.");
+        await this.database.runAsync(
+          "UPDATE reminders SET title = ?, due_on = ?, due_odometer_km = ?, recurrence = ?, notification_lead_days = ?, note = ?, snoozed_until = ?, updated_at = ?, sync_state = 'pending' WHERE id = ? AND vehicle_id = ? AND deleted_at IS NULL",
+          draft.title.trim(), draft.dueOn, draft.dueOdometerKm, draft.recurrence, draft.notificationLeadDays, nullableText(draft.note), draft.snoozedUntil, timestamp, draft.id, draft.vehicleId,
+        );
+        await this.database.runAsync("INSERT OR REPLACE INTO sync_metadata (entity_type, entity_id, operation, updated_at) VALUES ('reminder', ?, 'update', ?)", draft.id, timestamp);
+      });
+      const saved = await this.findById(draft.id);
+      if (!saved) throw new LocalStorageError("write-failed", "Reminder could not be updated.");
+      return saved;
+    } catch (error) {
+      if (error instanceof LocalStorageError) throw error;
+      throw new LocalStorageError("write-failed", "Reminder could not be updated. Please retry.", error);
+    }
+  }
+
+  async complete(id: string, completedAt: string): Promise<{ completed: Reminder; nextReminder: Reminder | null }> {
+    const timestamp = now();
+    try {
+      let nextReminder: Reminder | null = null;
+      await this.database.withTransactionAsync(async () => {
+        const existing = await this.findById(id);
+        if (!existing) throw new LocalStorageError("write-failed", "Reminder could not be found.");
+        if (existing.completedAt) return;
+        await this.database.runAsync("UPDATE reminders SET completed_at = ?, notification_id = NULL, updated_at = ?, sync_state = 'pending' WHERE id = ?", completedAt, timestamp, id);
+        await this.database.runAsync("INSERT OR REPLACE INTO sync_metadata (entity_type, entity_id, operation, updated_at) VALUES ('reminder', ?, 'complete', ?)", id, timestamp);
+        const nextDueOn = existing.dueOn ? getNextReminderDueOn(existing.dueOn, existing.recurrence) : null;
+        if (nextDueOn) {
+          const nextId = `${existing.id}:next:${nextDueOn}`;
+          await this.database.runAsync(
+            "INSERT OR IGNORE INTO reminders (id, vehicle_id, title, due_on, due_odometer_km, recurrence, notification_lead_days, note, created_at, updated_at, sync_state) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'local')",
+            nextId, existing.vehicleId, existing.title, nextDueOn, existing.dueOdometerKm, existing.recurrence, existing.notificationLeadDays, existing.note, timestamp, timestamp,
+          );
+          nextReminder = await this.findById(nextId);
+        }
+      });
+      const completed = await this.findById(id);
+      if (!completed) throw new LocalStorageError("write-failed", "Reminder could not be completed.");
+      return { completed, nextReminder };
+    } catch (error) {
+      if (error instanceof LocalStorageError) throw error;
+      throw new LocalStorageError("write-failed", "Reminder could not be completed. Please retry.", error);
+    }
+  }
+
+  async snooze(id: string, snoozedUntil: string): Promise<Reminder> {
+    const existing = await this.findById(id);
+    if (!existing) throw new LocalStorageError("write-failed", "Reminder could not be found.");
+    return this.update({ ...existing, snoozedUntil });
+  }
+
+  async setNotificationId(id: string, notificationId: string | null): Promise<void> {
+    const timestamp = now();
+    await this.database.runAsync("UPDATE reminders SET notification_id = ?, updated_at = ? WHERE id = ? AND completed_at IS NULL AND deleted_at IS NULL", notificationId, timestamp, id);
+  }
+
+  async softDelete(id: string): Promise<void> {
+    const timestamp = now();
+    try {
+      await this.database.withTransactionAsync(async () => {
+        await this.database.runAsync("UPDATE reminders SET deleted_at = ?, notification_id = NULL, updated_at = ?, sync_state = 'pending' WHERE id = ? AND deleted_at IS NULL", timestamp, timestamp, id);
+        await this.database.runAsync("INSERT OR REPLACE INTO sync_metadata (entity_type, entity_id, operation, updated_at) VALUES ('reminder', ?, 'delete', ?)", id, timestamp);
+      });
+    } catch (error) {
+      throw new LocalStorageError("write-failed", "Reminder could not be deleted. Please retry.", error);
     }
   }
 }

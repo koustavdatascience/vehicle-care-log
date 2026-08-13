@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { calculateExpenseTotal, calculateFuelEfficiency, getReminderStatus, validateDateNotInFuture, validateOdometerProgression, validateRepairDraft, validateServiceDraft, validateVehicleDraft } from "../../src/domain/services";
+import { calculateExpenseTotal, calculateFuelEfficiency, getNextReminderDueOn, getReminderStatus, validateDateNotInFuture, validateOdometerProgression, validateReminderDraft, validateRepairDraft, validateServiceDraft, validateVehicleDraft } from "../../src/domain/services";
 import { seedFuelEntry, seedVehicle } from "../../src/data/seed-fixtures";
 
 describe("Phase 4 domain services", () => {
@@ -17,7 +17,7 @@ describe("Phase 4 domain services", () => {
 
   it("calculates only active expense projections and handles due-soon versus overdue boundaries", () => {
     expect(calculateExpenseTotal([{ id: "expense-1", vehicleId: seedVehicle.id, sourceType: "fuel", sourceId: "fuel-1", occurredOn: "2026-08-01", category: "Fuel", cost: { amountMinor: 420000, currency: "INR" }, deletedAt: null }]).amountMinor).toBe(420000);
-    const reminder = { id: "reminder-1", vehicleId: seedVehicle.id, title: "Oil change", dueOn: "2026-08-20", dueOdometerKm: null, completedAt: null, snoozedUntil: null, createdAt: "", updatedAt: "", deletedAt: null, syncState: "local" as const };
+    const reminder = { id: "reminder-1", vehicleId: seedVehicle.id, title: "Oil change", dueOn: "2026-08-20", dueOdometerKm: null, recurrence: "none" as const, notificationId: null, notificationLeadDays: 7, note: null, completedAt: null, snoozedUntil: null, createdAt: "", updatedAt: "", deletedAt: null, syncState: "local" as const };
     expect(getReminderStatus(reminder, "2026-08-13")).toBe("due-soon");
     expect(getReminderStatus({ ...reminder, dueOn: "2026-08-12" }, "2026-08-13")).toBe("overdue");
   });
@@ -33,5 +33,21 @@ describe("Phase 4 domain services", () => {
     expect(valid.ok).toBe(true);
     const invalid = validateRepairDraft({ issue: " ", occurredOn: "2026-08-13", odometerKm: 46000, cost: { amountMinor: -1, currency: "INR" } }, "2026-08-13");
     expect(invalid.ok).toBe(false);
+  });
+
+  it("validates reminder timing, recurrence, notification lead time, and date-or-mileage requirement", () => {
+    const invalid = validateReminderDraft({ title: "", dueOn: null, dueOdometerKm: null, recurrence: "monthly", notificationLeadDays: 31, snoozedUntil: "not-a-date" });
+    expect(invalid.ok).toBe(false);
+    if (!invalid.ok) expect(invalid.issues.map((entry) => entry.field)).toEqual(expect.arrayContaining(["title", "due", "recurrence", "notificationLeadDays", "snoozedUntil"]));
+    expect(validateReminderDraft({ title: "Tyres", dueOn: null, dueOdometerKm: 50000, recurrence: "none", notificationLeadDays: 0, snoozedUntil: null }).ok).toBe(true);
+  });
+
+  it("keeps recurring schedules and status boundaries deterministic across month ends, mileage, and snoozes", () => {
+    expect(getNextReminderDueOn("2024-02-29", "yearly")).toBe("2025-02-28");
+    expect(getNextReminderDueOn("2026-01-31", "monthly")).toBe("2026-02-28");
+    const reminder = { id: "reminder-2", vehicleId: seedVehicle.id, title: "Tyres", dueOn: "2026-08-20", dueOdometerKm: 50000, recurrence: "none" as const, notificationId: null, notificationLeadDays: 7, note: null, completedAt: null, snoozedUntil: null, createdAt: "", updatedAt: "", deletedAt: null, syncState: "local" as const };
+    expect(getReminderStatus(reminder, "2026-08-13", 7, 49999)).toBe("due-soon");
+    expect(getReminderStatus({ ...reminder, dueOn: "2026-10-01" }, "2026-08-13", 7, 50000)).toBe("due-soon");
+    expect(getReminderStatus({ ...reminder, snoozedUntil: "2026-08-15" }, "2026-08-13", 7, 60000)).toBe("upcoming");
   });
 });
