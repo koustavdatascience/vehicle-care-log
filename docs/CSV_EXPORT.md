@@ -4,6 +4,10 @@
 
 This document defines the **Phase 1 contract** for a future local CSV export. The formatter, file creation, sharing experience, and export interface are intentionally outside this phase.
 
+## Formatter Behavior
+
+Phase 2 adds a pure local formatter. It emits the stable contract column order using CRLF line endings, escapes commas, quotes, and line breaks using RFC 4180-compatible quoting, formats INR paise as two-decimal rupee amounts and millilitres as litres, and returns an explicit empty result rather than creating a blank file. Text that begins with a spreadsheet formula prefix is protected before export.
+
 ## Contribution Attribution
 
 Before pushing a substantive export phase, the maintainer verifies the local Git author uses the GitHub account’s numeric no-reply address in the form `<numeric-id>+<login>@users.noreply.github.com`. The repository test validates this address format without depending on local Git configuration, so clean CI clones remain reproducible.
