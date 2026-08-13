@@ -20,6 +20,7 @@ import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
 import { LocalStorageProvider } from "@/components/foundation/local-storage-provider";
+import { SyncProvider } from "@/components/foundation/sync-provider";
 import { VehicleProvider } from "@/components/foundation/vehicle-provider";
 import { PreferencesProvider } from "@/components/foundation/preferences-provider";
 import { notificationReminderId } from "@/src/notifications/reminder-notification-policy";
@@ -104,9 +105,10 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <LocalStorageProvider>
             <PreferencesProvider>
-              <VehicleProvider>
-                <NotificationResponseRouter />
-                <Stack screenOptions={{ headerShown: false }}>
+              <SyncProvider>
+                <VehicleProvider>
+                  <NotificationResponseRouter />
+                  <Stack screenOptions={{ headerShown: false }}>
                   <Stack.Screen name="(tabs)" />
                   <Stack.Screen name="add-record" options={{ presentation: "modal", animation: "slide_from_bottom" }} />
                   <Stack.Screen name="vehicle/[id]" options={{ animation: "slide_from_right" }} />
@@ -116,9 +118,10 @@ export default function RootLayout() {
                   <Stack.Screen name="reminder/new" options={{ presentation: "modal", animation: "slide_from_bottom" }} />
                   <Stack.Screen name="reminder/[id]" options={{ animation: "slide_from_right" }} />
                   <Stack.Screen name="oauth/callback" />
-                </Stack>
-                <StatusBar style="auto" />
-              </VehicleProvider>
+                  </Stack>
+                  <StatusBar style="auto" />
+                </VehicleProvider>
+              </SyncProvider>
             </PreferencesProvider>
           </LocalStorageProvider>
         </QueryClientProvider>

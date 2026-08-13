@@ -4,6 +4,7 @@ import { FlatList, Pressable, StyleSheet, Switch, Text, View } from "react-nativ
 
 import { useLocalDatabase } from "@/components/foundation/local-storage-provider";
 import { usePreferences } from "@/components/foundation/preferences-provider";
+import { useSync } from "@/components/foundation/sync-provider";
 import { useActiveVehicle } from "@/components/foundation/vehicle-provider";
 import { AppHeader } from "@/components/layout/app-header";
 import { ScreenContainer } from "@/components/screen-container";
@@ -12,9 +13,12 @@ import { VclButton } from "@/components/ui/vcl-button";
 import { VclCard } from "@/components/ui/vcl-card";
 import { VclSegmentedControl } from "@/components/ui/vcl-segmented-control";
 import { layoutTokens } from "@/constants/design-tokens";
+import { startOAuthLogin } from "@/constants/oauth";
+import { useAuth } from "@/hooks/use-auth";
 import { useColors } from "@/hooks/use-colors";
 import { cancelReminderNotification, requestLocalNotificationPermission, syncReminderNotification } from "@/src/notifications/local-notification-adapter";
 import { LocalReminderRepository } from "@/src/repositories/local-repositories";
+import { exportPortableBackup } from "@/src/sync/attachment-and-backup-service";
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -23,8 +27,12 @@ export default function SettingsScreen() {
   const reminderRepository = useMemo(() => new LocalReminderRepository(database), [database]);
   const { preferences, error: preferencesError, isLoading: preferencesLoading, updatePreferences } = usePreferences();
   const { activeVehicleId, error, isLoading, selectVehicle, vehicles } = useActiveVehicle();
+  const { user } = useAuth();
+  const { account, status: syncStatus, message: syncMessage, syncNow, setLocalOnly } = useSync();
   const [notificationNotice, setNotificationNotice] = useState<string | null>(null);
   const [rescheduling, setRescheduling] = useState(false);
+  const [backupNotice, setBackupNotice] = useState<string | null>(null);
+  const [backingUp, setBackingUp] = useState(false);
   const openNew = () => router.push({ pathname: "/vehicle/[id]", params: { id: "new" } });
   const syncNotifications = async (enabled: boolean, requestPermission: boolean) => {
     setRescheduling(true); setNotificationNotice(null);
@@ -48,6 +56,16 @@ export default function SettingsScreen() {
   const changeNotifications = async (enabled: boolean) => {
     try { await updatePreferences({ notificationEnabled: enabled }); await syncNotifications(enabled, enabled); } catch { setNotificationNotice("Notification preference could not be saved. Please retry."); }
   };
+  const exportBackup = async () => {
+    setBackingUp(true); setBackupNotice(null);
+    try {
+      const result = await exportPortableBackup(database);
+      setBackupNotice(result.shared ? "Backup created and opened in the device share sheet." : "Backup created locally. Sharing is unavailable on this device.");
+    } catch (cause) { setBackupNotice(cause instanceof Error ? cause.message : "Backup could not be created."); } finally { setBackingUp(false); }
+  };
+  const beginAccountLink = async () => {
+    try { await startOAuthLogin(); } catch { setBackupNotice("The account-link page could not be opened. Your records remain stored locally."); }
+  };
 
   return (
     <ScreenContainer>
@@ -59,6 +77,17 @@ export default function SettingsScreen() {
           <VclButton label={rescheduling ? "Refreshing notifications" : "Refresh notification schedule"} variant="secondary" onPress={() => { void syncNotifications(preferences.notificationEnabled, preferences.notificationEnabled); }} disabled={rescheduling} />
           {notificationNotice ? <Text style={[styles.notice, { color: colors.muted }]} accessibilityLiveRegion="polite">{notificationNotice}</Text> : null}
           {preferencesError ? <InlineError message={preferencesError} /> : null}
+        </VclCard>
+        <VclCard style={styles.preferencesCard}>
+          <Text style={[styles.preferenceTitle, { color: colors.foreground }]}>Backup & sync</Text>
+          <Text style={[styles.detail, { color: colors.muted }]}>Optional cloud backup. Your vehicle care records always work on this device, including offline.</Text>
+          <Text style={[styles.syncState, { color: syncStatus === "ready" ? colors.success : syncStatus === "conflict" || syncStatus === "offline" ? colors.warning : colors.muted }]}>Status: {syncStatus === "local-only" ? "local only" : syncStatus}</Text>
+          {account.lastSyncAt ? <Text style={[styles.detail, { color: colors.muted }]}>Last backup: {new Date(account.lastSyncAt).toLocaleString("en-IN")}</Text> : null}
+          {!user ? <VclButton label="Link optional backup account" onPress={() => { void beginAccountLink(); }} /> : <><VclButton label="Back up this device now" onPress={() => { void syncNow("upload-device"); }} /><VclButton label="Restore account copy" variant="secondary" onPress={() => { void syncNow("download-cloud"); }} /></>}
+          {user ? <VclButton label="Keep data on this device only" variant="ghost" onPress={() => { void setLocalOnly(); }} /> : null}
+          {syncMessage ? <Text style={[styles.notice, { color: colors.muted }]} accessibilityLiveRegion="polite">{syncMessage}</Text> : null}
+          <VclButton label={backingUp ? "Preparing backup" : "Export portable backup"} variant="secondary" onPress={() => { void exportBackup(); }} loading={backingUp} />
+          {backupNotice ? <Text style={[styles.notice, { color: colors.muted }]} accessibilityLiveRegion="polite">{backupNotice}</Text> : null}
         </VclCard>
         <VclCard style={styles.preferencesCard}>
           <Text style={[styles.preferenceTitle, { color: colors.foreground }]}>Display & units</Text>
@@ -116,6 +145,7 @@ const styles = StyleSheet.create({
   settingRow: { flexDirection: "row", gap: layoutTokens.spacing.sm, alignItems: "center" },
   settingLabel: { fontSize: 14, fontWeight: "800" },
   notice: { fontSize: 13, lineHeight: 19 },
+  syncState: { fontSize: 14, fontWeight: "800", textTransform: "capitalize" },
   actions: { alignSelf: "flex-start" },
   list: { gap: layoutTokens.spacing.sm, paddingBottom: layoutTokens.spacing.xl },
   emptyList: { flexGrow: 1, justifyContent: "center" },

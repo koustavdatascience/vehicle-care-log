@@ -39,11 +39,17 @@
 - [x] Phase 7: Add deterministic tests for notification denial, timezone-safe schedule calculations, duplicate prevention, restart recovery, and due-status boundaries.
 - [x] CI repair: Inspect and correct the Phase 7 GitHub Quality Gate failure.
 - [x] CI repair: Re-run local validation, checkpoint, push, and confirm the GitHub workflow succeeds.
-- [ ] Phase 8: Implement approved account, cloud sync, attachment, and backup capabilities only after the local-first flows are stable.
-- [ ] Phase 8: Test offline outbox handling, conflict resolution, upload failure, account recovery, data deletion, and retry behavior.
+- [x] Phase 8: Implement approved account, cloud sync, attachment, and backup capabilities only after the local-first flows are stable.
+- [x] Phase 8: Test offline outbox handling, conflict resolution, upload failure, account recovery, data deletion, and retry behavior.
 - [ ] Phase 8: Commit and push the tested connected-data capabilities.
 - [ ] Phase 9: Complete accessibility, privacy, performance, reliability, analytics, and broad automated test coverage.
 - [ ] Phase 9: Test assistive technology, Dynamic Type, low storage, poor network, sensitive-log redaction, large data sets, and regression suite behavior.
 - [ ] Phase 9: Commit and push the tested quality hardening.
 - [ ] Phase 10: Prepare release configuration, pilot checklist, support materials, versioning, and final delivery documentation.
 - [ ] Phase 10: Validate signed release candidates, smoke-test critical journeys, confirm release notes, and push the final release-preparation commit.
+- [x] Phase 8: Define a local-first optional-auth, outbox, conflict, attachment, and backup architecture decision record.
+- [x] Phase 8: Implement account-aware sync state, offline outbox retry, conflict resolution, portable backup, and attachment workflows.
+- [x] Phase 8: Add connected-data failure, recovery, and migration coverage without making offline use dependent on a network.
+- [ ] Phase 9: Audit and improve accessibility semantics, Dynamic Type layout, privacy redaction, storage resilience, and list performance.
+- [ ] Phase 9: Add broad deterministic regression coverage for accessibility, large local datasets, retries, privacy, and error boundaries.
+- [ ] Phase 10: Complete versioning, release configuration, pilot checklist, support content, and final release-validation documentation.

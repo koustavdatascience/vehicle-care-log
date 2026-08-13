@@ -98,9 +98,44 @@ export interface Attachment {
   recordId: RecordId;
   localUri: string;
   mimeType: string;
+  fileName: string | null;
+  byteSize: number | null;
+  remoteKey: string | null;
+  uploadStatus: "queued" | "uploading" | "uploaded" | "failed";
   createdAt: string;
   deletedAt: string | null;
   syncState: SyncState;
+}
+
+export type SyncEntityType = "vehicle" | "fuel" | "service" | "repair" | "reminder" | "attachment";
+export type SyncOperation = "upsert" | "delete";
+export type AccountLinkDecision = "upload-device" | "download-cloud" | "postpone";
+
+/** Canonical local-first operation sent in a bounded, idempotent sync batch. */
+export interface SyncEnvelope {
+  entityType: SyncEntityType;
+  entityId: RecordId;
+  operation: SyncOperation;
+  updatedAt: string;
+  deletedAt: string | null;
+  payload: Record<string, unknown>;
+}
+
+export interface SyncAccountState {
+  accountId: string | null;
+  linkDecision: AccountLinkDecision | null;
+  pullCursor: number;
+  lastSyncAt: string | null;
+  lastError: string | null;
+}
+
+export interface SyncConflict {
+  id: number;
+  entityType: SyncEntityType;
+  entityId: RecordId;
+  localPayload: Record<string, unknown>;
+  remotePayload: Record<string, unknown>;
+  detectedAt: string;
 }
 
 export interface ExpenseProjection {
