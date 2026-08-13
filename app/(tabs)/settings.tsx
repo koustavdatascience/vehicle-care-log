@@ -7,6 +7,7 @@ import { useLocalDatabase } from "@/components/foundation/local-storage-provider
 import { usePreferences } from "@/components/foundation/preferences-provider";
 import { useActiveVehicle } from "@/components/foundation/vehicle-provider";
 import { AppHeader } from "@/components/layout/app-header";
+import { VehicleSelector } from "@/components/layout/vehicle-selector";
 import { ScreenContainer } from "@/components/screen-container";
 import { EmptyState, InlineError, LoadingState } from "@/components/ui/vcl-feedback";
 import { VclButton } from "@/components/ui/vcl-button";
@@ -15,19 +16,34 @@ import { VclSegmentedControl } from "@/components/ui/vcl-segmented-control";
 import { layoutTokens } from "@/constants/design-tokens";
 import { useColors } from "@/hooks/use-colors";
 import { formatInstalledAppVersion } from "@/src/config/app-version";
+import { createExpoCsvFileService } from "@/src/export/expo-csv-sharing-adapter";
+import { LocalCsvExportService } from "@/src/export/local-csv-export-service";
 import { cancelReminderNotification, requestLocalNotificationPermission, syncReminderNotification } from "@/src/notifications/local-notification-adapter";
-import { LocalReminderRepository } from "@/src/repositories/local-repositories";
+import { LocalFuelRepository, LocalReminderRepository, LocalRepairRepository, LocalServiceRepository } from "@/src/repositories/local-repositories";
+import { rangeForPeriod } from "@/src/reporting/selectors";
+
+type ExportPeriod = "month" | "quarter" | "year" | "all";
+const exportPeriodOptions: readonly { label: string; value: ExportPeriod }[] = [{ label: "Month", value: "month" }, { label: "3 months", value: "quarter" }, { label: "Year", value: "year" }, { label: "All", value: "all" }];
+const todayIsoDate = () => new Date().toISOString().slice(0, 10);
 
 export default function SettingsScreen() {
   const router = useRouter();
   const colors = useColors();
   const database = useLocalDatabase();
   const reminderRepository = useMemo(() => new LocalReminderRepository(database), [database]);
+  const csvExportService = useMemo(() => new LocalCsvExportService(new LocalFuelRepository(database), new LocalServiceRepository(database), new LocalRepairRepository(database)), [database]);
+  const csvFileService = useMemo(() => createExpoCsvFileService(), []);
   const { preferences, error: preferencesError, isLoading: preferencesLoading, updatePreferences } = usePreferences();
   const { activeVehicleId, error, isLoading, selectVehicle, vehicles } = useActiveVehicle();
   const installedVersion = formatInstalledAppVersion(Constants.nativeAppVersion ?? Constants.expoConfig?.version);
   const [notificationNotice, setNotificationNotice] = useState<string | null>(null);
   const [rescheduling, setRescheduling] = useState(false);
+  const [exportVehicleId, setExportVehicleId] = useState<string | null>(activeVehicleId);
+  const [exportPeriod, setExportPeriod] = useState<ExportPeriod>("all");
+  const [exportingCsv, setExportingCsv] = useState(false);
+  const [exportNotice, setExportNotice] = useState<string | null>(null);
+  const exportVehicle = vehicles.find((vehicle) => vehicle.id === exportVehicleId) ?? vehicles.find((vehicle) => vehicle.id === activeVehicleId) ?? null;
+  const exportRange = useMemo(() => rangeForPeriod(todayIsoDate(), exportPeriod), [exportPeriod]);
   const openNew = () => router.push({ pathname: "/vehicle/[id]", params: { id: "new" } });
   const syncNotifications = async (enabled: boolean, requestPermission: boolean) => {
     setRescheduling(true); setNotificationNotice(null);
@@ -51,6 +67,19 @@ export default function SettingsScreen() {
   const changeNotifications = async (enabled: boolean) => {
     try { await updatePreferences({ notificationEnabled: enabled }); await syncNotifications(enabled, enabled); } catch { setNotificationNotice("Notification preference could not be saved. Please retry."); }
   };
+  const exportCsv = async () => {
+    if (!exportVehicle) { setExportNotice("Choose a vehicle before exporting a local report."); return; }
+    setExportingCsv(true); setExportNotice(null);
+    try {
+      const result = await csvExportService.create({ vehicleId: exportVehicle.id, recordTypes: ["fuel", "service", "repair"], ...exportRange });
+      const outcome = await csvFileService.share(result);
+      if (outcome.status === "shared") setExportNotice(`${outcome.rowCount} local record${outcome.rowCount === 1 ? " was" : "s were"} prepared for sharing. Exported files may be visible to the app you choose.`);
+      else if (outcome.status === "empty") setExportNotice("No local fuel, service, or repair records match this date range.");
+      else if (outcome.status === "unavailable") setExportNotice("CSV sharing is unavailable on this platform. Use a supported device to export the local report.");
+      else setExportNotice("The local CSV report could not be prepared. Please retry.");
+    } catch { setExportNotice("The local CSV report could not be prepared. Please retry."); }
+    finally { setExportingCsv(false); }
+  };
 
   return (
     <ScreenContainer>
@@ -71,6 +100,14 @@ export default function SettingsScreen() {
         <VclCard style={styles.versionCard} accessibilityLabel={`Installed app ${installedVersion}`}>
           <Text style={[styles.settingLabel, { color: colors.foreground }]}>App version</Text>
           <Text style={[styles.detail, { color: colors.muted }]}>{installedVersion}</Text>
+        </VclCard>
+        <VclCard style={styles.preferencesCard}>
+          <Text style={[styles.preferenceTitle, { color: colors.foreground }]}>Local CSV report</Text>
+          <Text style={[styles.detail, { color: colors.muted }]}>Create a spreadsheet-friendly fuel, service, and repair report. It remains on this device until you choose an app in the share sheet.</Text>
+          <VehicleSelector label={exportVehicle?.nickname ?? "Choose a vehicle"} helperText="The report includes only this vehicle's selected local records." vehicles={vehicles} activeVehicleId={exportVehicle?.id ?? null} onSelectVehicle={(id) => setExportVehicleId(id)} onManageVehicles={() => router.push("/(tabs)/settings")} disabled={exportingCsv} />
+          <VclSegmentedControl label="CSV date range" value={exportPeriod} options={exportPeriodOptions} onChange={setExportPeriod} />
+          <VclButton label={exportingCsv ? "Preparing CSV report" : "Export CSV report"} variant="secondary" onPress={() => { void exportCsv(); }} disabled={exportingCsv || !exportVehicle} accessibilityHint="Creates a local CSV report and opens the device share sheet." />
+          {exportNotice ? <Text style={[styles.notice, { color: colors.muted }]} accessibilityRole="alert" accessibilityLiveRegion="polite">{exportNotice}</Text> : null}
         </VclCard>
         <View style={styles.actions}>
           <VclButton label="Add vehicle" icon="plus" onPress={openNew} />
