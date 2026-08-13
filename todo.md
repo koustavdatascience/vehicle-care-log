@@ -55,3 +55,4 @@
 - [x] CSV export Phase 2: Implement a deterministic local formatter with RFC 4180-safe escaping, export-safe values, and empty-result behavior.
 - [x] CSV export Phase 3: Add a permission-aware native export service and accessible Settings action that shares filtered local CSV data without blocking normal app use.
 - [x] CSV export Phase 4: Harden temporary-file privacy, accessibility feedback, and offline export documentation with deterministic regression coverage.
+- [x] CSV export Phase 5: Rehearse local-only export outcomes, verify the attributable release path, and complete final export documentation validation.
