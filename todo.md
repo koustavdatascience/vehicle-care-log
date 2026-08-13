@@ -53,4 +53,5 @@
 - [x] Phase 9: Audit and improve accessibility semantics, Dynamic Type layout, privacy redaction, storage resilience, and list performance.
 - [x] Phase 9: Add broad deterministic regression coverage for accessibility, large local datasets, retries, privacy, and error boundaries.
 - [x] Phase 9 hotfix: Replace raw OAuth launcher logging with safe diagnostics and add a deterministic privacy regression test.
+- [x] Phase 9 hotfix: Replace raw OAuth callback logging and exception-derived error UI with safe diagnostics and generic recovery messaging.
 - [ ] Phase 10: Complete versioning, release configuration, pilot checklist, support content, and final release-validation documentation.
