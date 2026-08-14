@@ -10,7 +10,7 @@ The export flow is available on supported iOS and Android devices. It does not r
 
 | Step | Behaviour |
 |---|---|
-| Select scope | The user chooses one vehicle and a local date range: all time, this year, last 12 months, or last 30 days. |
+| Select scope | The user chooses one vehicle and a local date range: a preset period or a custom inclusive date range with an optional start and end date. |
 | Create report | The app reads only that vehicle’s locally stored fuel, service, and repair records, then creates a CSV in the device cache. |
 | Share | The device share sheet opens. The user decides whether to share, save, or cancel. |
 | Recover | Empty, unsupported, and file/share failures are shown as bounded recovery messages without technical error details. |
@@ -27,7 +27,7 @@ Temporary reports are written to the app cache rather than persistent document s
 
 ## CSV Format and Spreadsheet Safety
 
-The formatter uses a fixed eight-column order and CRLF line endings. It escapes commas, quotation marks, and line breaks using RFC 4180-compatible CSV quoting. Values that begin with spreadsheet formula prefixes are protected before export. Empty filters return a clear no-records result rather than a blank or header-only report.
+The formatter uses a fixed eight-column order and CRLF line endings. It escapes commas, quotation marks, and line breaks using RFC 4180-compatible CSV quoting. Values that begin with spreadsheet formula prefixes are protected before export. Empty filters return a clear no-records result rather than a blank or header-only report. Custom dates must be valid `YYYY-MM-DD` calendar dates; both boundaries are inclusive, and an end date cannot precede its start date.
 
 ## Accessibility and Testing
 

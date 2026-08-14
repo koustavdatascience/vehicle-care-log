@@ -8,6 +8,7 @@ import { usePreferences } from "@/components/foundation/preferences-provider";
 import { useActiveVehicle } from "@/components/foundation/vehicle-provider";
 import { AppHeader } from "@/components/layout/app-header";
 import { VehicleSelector } from "@/components/layout/vehicle-selector";
+import { DateField } from "@/components/records/date-field";
 import { ScreenContainer } from "@/components/screen-container";
 import { EmptyState, InlineError, LoadingState } from "@/components/ui/vcl-feedback";
 import { VclButton } from "@/components/ui/vcl-button";
@@ -16,14 +17,15 @@ import { VclSegmentedControl } from "@/components/ui/vcl-segmented-control";
 import { layoutTokens } from "@/constants/design-tokens";
 import { useColors } from "@/hooks/use-colors";
 import { formatInstalledAppVersion } from "@/src/config/app-version";
+import { validateCustomCsvDateRange } from "@/src/export/date-range";
 import { createExpoCsvFileService } from "@/src/export/expo-csv-sharing-adapter";
 import { LocalCsvExportService } from "@/src/export/local-csv-export-service";
 import { cancelReminderNotification, requestLocalNotificationPermission, syncReminderNotification } from "@/src/notifications/local-notification-adapter";
 import { LocalFuelRepository, LocalReminderRepository, LocalRepairRepository, LocalServiceRepository } from "@/src/repositories/local-repositories";
 import { rangeForPeriod } from "@/src/reporting/selectors";
 
-type ExportPeriod = "month" | "quarter" | "year" | "all";
-const exportPeriodOptions: readonly { label: string; value: ExportPeriod }[] = [{ label: "Month", value: "month" }, { label: "3 months", value: "quarter" }, { label: "Year", value: "year" }, { label: "All", value: "all" }];
+type ExportPeriod = "month" | "quarter" | "year" | "all" | "custom";
+const exportPeriodOptions: readonly { label: string; value: ExportPeriod }[] = [{ label: "Month", value: "month" }, { label: "3 months", value: "quarter" }, { label: "Year", value: "year" }, { label: "All", value: "all" }, { label: "Custom", value: "custom" }];
 const todayIsoDate = () => new Date().toISOString().slice(0, 10);
 
 export default function SettingsScreen() {
@@ -40,10 +42,13 @@ export default function SettingsScreen() {
   const [rescheduling, setRescheduling] = useState(false);
   const [exportVehicleId, setExportVehicleId] = useState<string | null>(activeVehicleId);
   const [exportPeriod, setExportPeriod] = useState<ExportPeriod>("all");
+  const [customExportStartOn, setCustomExportStartOn] = useState<string | null>(null);
+  const [customExportEndOn, setCustomExportEndOn] = useState<string | null>(null);
   const [exportingCsv, setExportingCsv] = useState(false);
   const [exportNotice, setExportNotice] = useState<string | null>(null);
   const exportVehicle = vehicles.find((vehicle) => vehicle.id === exportVehicleId) ?? vehicles.find((vehicle) => vehicle.id === activeVehicleId) ?? null;
-  const exportRange = useMemo(() => rangeForPeriod(todayIsoDate(), exportPeriod), [exportPeriod]);
+  const customExportRange = useMemo(() => validateCustomCsvDateRange({ startOn: customExportStartOn, endOn: customExportEndOn }), [customExportEndOn, customExportStartOn]);
+  const exportRange = useMemo(() => exportPeriod === "custom" ? customExportRange.range : rangeForPeriod(todayIsoDate(), exportPeriod), [customExportRange.range, exportPeriod]);
   const openNew = () => router.push({ pathname: "/vehicle/[id]", params: { id: "new" } });
   const syncNotifications = async (enabled: boolean, requestPermission: boolean) => {
     setRescheduling(true); setNotificationNotice(null);
@@ -69,9 +74,11 @@ export default function SettingsScreen() {
   };
   const exportCsv = async () => {
     if (!exportVehicle) { setExportNotice("Choose a vehicle before exporting a local report."); return; }
+    if (exportPeriod === "custom" && (!customExportRange.ok || !exportRange)) { setExportNotice("Select a valid date range before exporting a local report."); return; }
+    const selectedRange = exportRange ?? { startOn: null, endOn: null };
     setExportingCsv(true); setExportNotice(null);
     try {
-      const result = await csvExportService.create({ vehicleId: exportVehicle.id, recordTypes: ["fuel", "service", "repair"], ...exportRange });
+      const result = await csvExportService.create({ vehicleId: exportVehicle.id, recordTypes: ["fuel", "service", "repair"], ...selectedRange });
       const outcome = await csvFileService.share(result);
       if (outcome.status === "shared") setExportNotice(`${outcome.rowCount} local record${outcome.rowCount === 1 ? " was" : "s were"} prepared for sharing. Exported files may be visible to the app you choose.`);
       else if (outcome.status === "empty") setExportNotice("No local fuel, service, or repair records match this date range.");
@@ -105,8 +112,9 @@ export default function SettingsScreen() {
           <Text style={[styles.preferenceTitle, { color: colors.foreground }]}>Local CSV report</Text>
           <Text style={[styles.detail, { color: colors.muted }]} accessibilityLabel="Local-only report. It is created on this device, then may be copied by the app you choose from the share sheet.">Create a spreadsheet-friendly fuel, service, and repair report. It is created on this device, then may be copied by the app you choose in the share sheet.</Text>
           <VehicleSelector label={exportVehicle?.nickname ?? "Choose a vehicle"} helperText="The report includes only this vehicle's selected local records." vehicles={vehicles} activeVehicleId={exportVehicle?.id ?? null} onSelectVehicle={(id) => setExportVehicleId(id)} onManageVehicles={() => router.push("/(tabs)/settings")} disabled={exportingCsv} />
-          <VclSegmentedControl label="CSV date range" value={exportPeriod} options={exportPeriodOptions} onChange={setExportPeriod} />
-          <VclButton label={exportingCsv ? "Preparing CSV report" : "Export CSV report"} variant="secondary" onPress={() => { void exportCsv(); }} disabled={exportingCsv || !exportVehicle} accessibilityHint="Creates a local CSV report and opens the device share sheet." />
+          <VclSegmentedControl label="CSV date range" value={exportPeriod} options={exportPeriodOptions} onChange={(nextPeriod) => { setExportPeriod(nextPeriod); setExportNotice(null); }} />
+          {exportPeriod === "custom" ? <View style={styles.customDateRange}><Text style={[styles.detail, { color: colors.muted }]}>Choose an optional inclusive start or end date. Leave either date clear to include the remaining local history.</Text><DateField label="CSV export start date" value={customExportStartOn} onChange={setCustomExportStartOn} optional maximumDate={customExportEndOn ?? undefined} error={customExportRange.startError} /><DateField label="CSV export end date" value={customExportEndOn} onChange={setCustomExportEndOn} optional minimumDate={customExportStartOn ?? undefined} error={customExportRange.endError} /></View> : null}
+          <VclButton label={exportingCsv ? "Preparing CSV report" : "Export CSV report"} variant="secondary" onPress={() => { void exportCsv(); }} disabled={exportingCsv || !exportVehicle || (exportPeriod === "custom" && !customExportRange.ok)} accessibilityHint="Creates a local CSV report and opens the device share sheet." />
           {exportNotice ? <Text style={[styles.notice, { color: colors.muted }]} accessibilityRole="alert" accessibilityLiveRegion="polite">{exportNotice}</Text> : null}
         </VclCard>
         <View style={styles.actions}>
@@ -156,6 +164,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   content: { flex: 1, padding: layoutTokens.spacing.md, gap: layoutTokens.spacing.md },
   preferencesCard: { gap: layoutTokens.spacing.md },
+  customDateRange: { gap: layoutTokens.spacing.sm },
   versionCard: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: layoutTokens.spacing.sm },
   preferenceTitle: { fontSize: 16, fontWeight: "800" },
   settingRow: { flexDirection: "row", gap: layoutTokens.spacing.sm, alignItems: "center" },

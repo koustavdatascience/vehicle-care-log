@@ -22,6 +22,16 @@ describe("Phase 3 Settings CSV export contract", () => {
     expect(source).not.toContain("console.error");
   });
 
+  it("offers an accessible, locally validated custom inclusive date range", () => {
+    expect(source).toContain('label: "Custom", value: "custom"');
+    expect(source).toContain('exportPeriod === "custom"');
+    expect(source).toContain('label="CSV export start date"');
+    expect(source).toContain('label="CSV export end date"');
+    expect(source).toContain("validateCustomCsvDateRange");
+    expect(source).toContain("minimumDate={customExportStartOn ?? undefined}");
+    expect(documentation).toContain("custom inclusive date range");
+  });
+
   it("explains the selected sharing destination and documents temporary-file handling", () => {
     expect(source).toContain("then may be copied by the app you choose from the share sheet");
     expect(documentation).toContain("If file creation or sharing fails after a report was written, the app attempts to delete that partial cached file");

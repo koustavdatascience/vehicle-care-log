@@ -25,7 +25,8 @@ function issue(field: string, code: ValidationCode, message: string): Validation
 
 export function isValidIsoDate(value: string): boolean {
   if (!ISO_DATE.test(value)) return false;
-  return !Number.isNaN(Date.parse(`${value}T00:00:00.000Z`));
+  const parsed = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
 }
 
 export function validateDateNotInFuture(value: string, today: string): ValidationResult {

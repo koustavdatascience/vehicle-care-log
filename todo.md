@@ -39,14 +39,14 @@
 - [x] Phase 7: Add deterministic tests for notification denial, timezone-safe schedule calculations, duplicate prevention, restart recovery, and due-status boundaries.
 - [x] CI repair: Inspect and correct the Phase 7 GitHub Quality Gate failure.
 - [x] CI repair: Re-run local validation, checkpoint, push, and confirm the GitHub workflow succeeds.
-- [ ] Phase 8: Implement approved account, cloud sync, attachment, and backup capabilities only after the local-first flows are stable.
-- [ ] Phase 8: Test offline outbox handling, conflict resolution, upload failure, account recovery, data deletion, and retry behavior.
-- [ ] Phase 8: Commit and push the tested connected-data capabilities.
-- [ ] Phase 9: Complete accessibility, privacy, performance, reliability, analytics, and broad automated test coverage.
-- [ ] Phase 9: Test assistive technology, Dynamic Type, low storage, poor network, sensitive-log redaction, large data sets, and regression suite behavior.
-- [ ] Phase 9: Commit and push the tested quality hardening.
-- [ ] Phase 10: Prepare release configuration, pilot checklist, support materials, versioning, and final delivery documentation.
-- [ ] Phase 10: Validate signed release candidates, smoke-test critical journeys, confirm release notes, and push the final release-preparation commit.
+- [x] Phase 8: Implement approved account, cloud sync, attachment, and backup capabilities only after the local-first flows are stable.
+- [x] Phase 8: Test offline outbox handling, conflict resolution, upload failure, account recovery, data deletion, and retry behavior.
+- [x] Phase 8: Commit and push the tested connected-data capabilities.
+- [x] Phase 9: Complete accessibility, privacy, performance, reliability, analytics, and broad automated test coverage.
+- [x] Phase 9: Test assistive technology, Dynamic Type, low storage, poor network, sensitive-log redaction, large data sets, and regression suite behavior.
+- [x] Phase 9: Commit and push the tested quality hardening.
+- [x] Phase 10: Prepare release configuration, pilot checklist, support materials, versioning, and final delivery documentation.
+- [x] Phase 10: Validate signed release candidates, smoke-test critical journeys, confirm release notes, and push the final release-preparation commit.
 - [ ] Supabase migration: Preserve offline-first SQLite while replacing the optional cloud sync, account, and attachment backend with Supabase Auth, Postgres, and Storage.
 - [ ] Supabase migration: Define the protected schema, row-level security, secure environment boundary, conflict protocol, data deletion flow, and deployment migration guide.
 - [ ] Supabase migration: Implement, test, checkpoint, and push the optional Supabase-backed sync integration.
@@ -56,3 +56,7 @@
 - [x] CSV export Phase 3: Add a permission-aware native export service and accessible Settings action that shares filtered local CSV data without blocking normal app use.
 - [x] CSV export Phase 4: Harden temporary-file privacy, accessibility feedback, and offline export documentation with deterministic regression coverage.
 - [x] CSV export Phase 5: Rehearse local-only export outcomes, verify the attributable release path, and complete final export documentation validation.
+- [x] Post-delivery roadmap: select and scope the next privacy-preserving local-first enhancement before implementation.
+- [x] Phase 11: Add a custom inclusive local date range to the CSV export flow without changing its privacy boundary.
+- [x] Phase 11: Test date validation, ordered and partial ranges, inclusive boundaries, and existing export regressions.
+- [ ] Phase 11: Checkpoint, commit, push, and confirm the custom date-range delivery.
