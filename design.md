@@ -71,3 +71,15 @@ The application supports Dynamic Type, VoiceOver labels and hints, reduced motio
 ## Phase Boundary
 
 This brief defines the final UX target. Phase 2 establishes the project and engineering foundation only. The theme tokens, tab shell, visual components, and actual screen implementation begin in **Phase 3**; persisted vehicle and record data begin in **Phase 4**.
+
+## UI Refinement — Card-First Local Care Workspace
+
+The post-delivery refresh uses the supplied reference only for its **airy hierarchy, rounded card composition, calm neutral canvas, and restrained motion**. Vehicle Care Log retains its own vehicle-care content, brand colors, and local-first language; it does not reproduce the reference application’s labels, imagery, data, or branding.
+
+| Area | Update | Acceptance criterion |
+|---|---|---|
+| Vehicle management | The Settings/garage list becomes the sole vertical `FlatList`, with every settings surface moved into its `ListHeaderComponent`. | The user can scroll from the top controls through every saved vehicle on compact portrait devices. |
+| Local-first controls | No linked-account, cloud-backup, or sync call-to-action is shown in the primary dashboard or Settings flow. | Core vehicle, reminder, and CSV actions remain available without an account or network. |
+| Visual hierarchy | Use a soft neutral canvas, compact header, generous card spacing, clearly separated sections, and a strong lower-thumb primary action. | The main screens read as an intentional mobile workspace rather than a dense settings form. |
+| Vehicle selector | Present the active vehicle as a clean elevated selector and use the existing sheet for switching or managing vehicles. | The switcher remains accessible and every affordance has a 44-point minimum target. |
+| Opening motion | A single fade-and-rise transition plays once after the application shell becomes ready. | Motion completes within 280ms, does not block interaction, and is disabled when the system requests reduced motion. |

@@ -13,4 +13,4 @@ export function VclCard({ children, onPress, accessibilityLabel, disabled = fals
   return <Pressable testID={testID} accessibilityRole="button" accessibilityLabel={accessibilityLabel} accessibilityState={{ disabled }} disabled={disabled} onPress={onPress} style={({ pressed }) => [baseStyle, pressed && !disabled && styles.pressed, disabled && styles.disabled]}>{children}</Pressable>;
 }
 
-const styles = StyleSheet.create({ card: { borderWidth: StyleSheet.hairlineWidth, borderRadius: layoutTokens.radius.lg, padding: layoutTokens.spacing.md }, pressed: { opacity: 0.78, transform: [{ scale: 0.99 }] }, disabled: { opacity: 0.5 } });
+const styles = StyleSheet.create({ card: { borderWidth: StyleSheet.hairlineWidth, borderRadius: layoutTokens.radius.lg, padding: layoutTokens.spacing.md }, pressed: { opacity: 0.8, transform: [{ scale: 0.985 }] }, disabled: { opacity: 0.5 } });

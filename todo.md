@@ -60,3 +60,8 @@
 - [x] Phase 11: Add a custom inclusive local date range to the CSV export flow without changing its privacy boundary.
 - [x] Phase 11: Test date validation, ordered and partial ranges, inclusive boundaries, and existing export regressions.
 - [x] Phase 11: Checkpoint, commit, push, and confirm the custom date-range delivery.
+- [x] UI refinement: Fix Manage Vehicles so the screen content scrolls reliably on compact devices.
+- [x] UI refinement: Remove optional linked-backup account controls from Settings while preserving local-first vehicle features.
+- [x] UI refinement: Refresh the card hierarchy, spacing, navigation treatment, and primary actions using the supplied reference as visual inspiration without copying its content or branding.
+- [x] UI refinement: Add a brief accessible opening animation that respects reduced-motion preferences.
+- [ ] UI refinement: Validate the refreshed screens, run the quality gate, checkpoint, commit, push, and confirm the GitHub workflow.

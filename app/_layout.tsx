@@ -20,6 +20,7 @@ import type { EdgeInsets, Metrics, Rect } from "react-native-safe-area-context";
 import { trpc, createTRPCClient } from "@/lib/trpc";
 import { initManusRuntime, subscribeSafeAreaInsets } from "@/lib/_core/manus-runtime";
 import { LocalStorageProvider } from "@/components/foundation/local-storage-provider";
+import { AppOpeningTransition } from "@/components/foundation/app-opening-transition";
 import { VehicleProvider } from "@/components/foundation/vehicle-provider";
 import { PreferencesProvider } from "@/components/foundation/preferences-provider";
 import { notificationReminderId } from "@/src/notifications/reminder-notification-policy";
@@ -105,18 +106,20 @@ export default function RootLayout() {
           <LocalStorageProvider>
             <PreferencesProvider>
               <VehicleProvider>
-                <NotificationResponseRouter />
-                <Stack screenOptions={{ headerShown: false }}>
-                  <Stack.Screen name="(tabs)" />
-                  <Stack.Screen name="add-record" options={{ presentation: "modal", animation: "slide_from_bottom" }} />
-                  <Stack.Screen name="vehicle/[id]" options={{ animation: "slide_from_right" }} />
-                  <Stack.Screen name="vehicle/[id]/records" options={{ animation: "slide_from_right" }} />
-                  <Stack.Screen name="record/[type]/[id]" options={{ animation: "slide_from_right" }} />
-                  <Stack.Screen name="reminders" options={{ animation: "slide_from_right" }} />
-                  <Stack.Screen name="reminder/new" options={{ presentation: "modal", animation: "slide_from_bottom" }} />
-                  <Stack.Screen name="reminder/[id]" options={{ animation: "slide_from_right" }} />
-                  <Stack.Screen name="oauth/callback" />
-                </Stack>
+                <AppOpeningTransition>
+                  <NotificationResponseRouter />
+                  <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="(tabs)" />
+                    <Stack.Screen name="add-record" options={{ presentation: "modal", animation: "slide_from_bottom" }} />
+                    <Stack.Screen name="vehicle/[id]" options={{ animation: "slide_from_right" }} />
+                    <Stack.Screen name="vehicle/[id]/records" options={{ animation: "slide_from_right" }} />
+                    <Stack.Screen name="record/[type]/[id]" options={{ animation: "slide_from_right" }} />
+                    <Stack.Screen name="reminders" options={{ animation: "slide_from_right" }} />
+                    <Stack.Screen name="reminder/new" options={{ presentation: "modal", animation: "slide_from_bottom" }} />
+                    <Stack.Screen name="reminder/[id]" options={{ animation: "slide_from_right" }} />
+                    <Stack.Screen name="oauth/callback" />
+                  </Stack>
+                </AppOpeningTransition>
                 <StatusBar style="auto" />
               </VehicleProvider>
             </PreferencesProvider>
