@@ -59,4 +59,4 @@
 - [x] Post-delivery roadmap: select and scope the next privacy-preserving local-first enhancement before implementation.
 - [x] Phase 11: Add a custom inclusive local date range to the CSV export flow without changing its privacy boundary.
 - [x] Phase 11: Test date validation, ordered and partial ranges, inclusive boundaries, and existing export regressions.
-- [ ] Phase 11: Checkpoint, commit, push, and confirm the custom date-range delivery.
+- [x] Phase 11: Checkpoint, commit, push, and confirm the custom date-range delivery.
