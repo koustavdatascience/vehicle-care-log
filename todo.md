@@ -66,5 +66,5 @@
 - [x] UI refinement: Add a brief accessible opening animation that respects reduced-motion preferences.
 - [x] UI refinement: Validate the refreshed screens, run the quality gate, checkpoint, commit, push, and confirm the GitHub workflow.
 - [x] APK release: Inspect the provided Android APK and prepare a versioned GitHub Release asset outside source history.
-- [ ] APK release: Confirm the public release details, upload the APK after approval, and verify the resulting download page.
+- [x] APK release: Confirm the public release details, upload the APK after approval, and verify the resulting download page.
 - [x] Documentation: Add a plain-language installation and in-app usage guide for Vehicle Care Log, then link it from the public APK release.
