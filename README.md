@@ -18,6 +18,10 @@ The app uses Expo Router, React Native, TypeScript, NativeWind, and Vitest. The 
 
 Further engineering conventions are documented in [`docs/development.md`](docs/development.md), and source boundaries are described in [`src/README.md`](src/README.md).
 
+## Using the Android app
+
+For installation, vehicle setup, record logging, reminders, and local CSV exports, see the plain-language [Vehicle Care Log User Guide](docs/USER_GUIDE.md).
+
 ## Repository contents
 
 ### Product and architecture documents
